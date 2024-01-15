@@ -8,7 +8,7 @@ export default function generatePageData({
 }: PageData = {}): PageData {
   const metadataWithDefaults = {
     ...metadata,
-    title: metadata?.title ?? 'Vietnamese App',
+    title: metadata?.title ?? 'Vietnamease App',
     description: metadata?.description ?? 'An app to help you learn Vietnamese',
   }
   const viewportWithDefaults = {
