@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Page } from 'matterial'
 import OpenAI from 'openai'
 import getEnv from '@/utils/get-env'
+import cache from '@/utils/cache'
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
@@ -58,8 +59,15 @@ function getTranslation(data: WikiRecord): string | null {
   }
 }
 
-async function getData() {
+async function getData(): Promise<string[]> {
   const searchTerm = 'example'
+
+  const cached = cache.get(searchTerm)
+  if (cached) {
+    console.log('cache hit', searchTerm)
+    return JSON.parse(cached)
+  }
+
   const results: string[] = []
   const lang = 'en'
   const res = await fetch(
@@ -107,18 +115,19 @@ async function getData() {
     const chatCompletion: OpenAI.Chat.ChatCompletion =
       await openai.chat.completions.create(params)
     console.log('chat completion usage', chatCompletion.usage)
-    if (!chatCompletion.choices?.length) {
-      return
+    if (chatCompletion.choices?.length) {
+      chatCompletion.choices.forEach(({ message: { content } }) => {
+        console.log('chat content:', content)
+        if (content && !results.includes(content)) {
+          results.push(content)
+        }
+      })
     }
-    chatCompletion.choices.forEach(({ message: { content } }) => {
-      console.log('chat content:', content)
-      if (content && !results.includes(content)) {
-        results.push(content)
-      }
-    })
   } catch (e) {
     console.error(e)
   }
+
+  cache.set(searchTerm, JSON.stringify(results))
 
   return results
 }
