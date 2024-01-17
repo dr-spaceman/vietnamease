@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import { Container, Page, TextInput, Button } from 'matterial'
+import { Page } from 'matterial'
 import { Metadata, ResolvingMetadata } from 'next'
 import * as React from 'react'
 
@@ -164,14 +164,6 @@ export default async function DPage({ searchParams: { q } }: Props) {
   return (
     <Page noNav>
       <SearchResults data={data} />
-      <form method="get">
-        <Container>
-          <TextInput name="q" />
-          <Button variant="contained" color="primary" type="submit">
-            Search
-          </Button>
-        </Container>
-      </form>
     </Page>
   )
 }

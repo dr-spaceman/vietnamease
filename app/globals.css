@@ -1,0 +1,51 @@
+:root {
+  font-family: unset;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.page-header {
+  box-sizing: border-box;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: var(--layout-v-spacing, var(--space-small));
+  padding-left: var(--layout-h-spacing, var(--space-small));
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 1em;
+}
+
+@media screen and (min-width: 640px) {
+  .page-header {
+    --layout-h-spacing: var(--space-large);
+    --layout-v-spacing: var(--space-medium);
+  }
+}
+
+.page-header h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.3em;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.page-header__search {
+  position: relative;
+  display: inline-block;
+}
+
+.page-header__search button {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: 0;
+}
+
+.page-header__search input {
+  padding-right: calc(var(--input-padding) + 15px);
+}
