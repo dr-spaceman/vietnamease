@@ -36,3 +36,25 @@
 
 .controls {
 }
+
+.darkPanel {
+  padding: 1em;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 1em;
+  color: white;
+  background-color: var(--color-surface-dark);
+  border-radius: var(--radius);
+}
+
+.darkPanel button {
+  flex-shrink: 0;
+  color: rgb(49, 49, 49);
+}
+
+@media screen and (max-width: 640px) {
+  .darkPanel small {
+    font-size: 0.6em;
+  }
+}

@@ -3,6 +3,7 @@
 import { Button, CheckButton, CheckButtonGroup, Container } from 'matterial'
 import classes from './flash-cards.module.css'
 import React from 'react'
+import useLocalStorage from '@/utils/use-local-storage-serialized'
 
 const LANGUAGE_MAP = {
   en: 'English',
@@ -55,15 +56,6 @@ const cardsMock: Card[] = [
 function sortCards(cards: Card[]): Card[] {
   return cards.sort((a, b) => a.level - b.level)
 }
-
-// function findCard(id: Card['id']): Card {
-//   const foundCard = cards.find(card => card.id === id)
-//   if (!foundCard) {
-//     throw new Error(`Couldn't find card ${id}`)
-//   }
-
-//   return foundCard
-// }
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -127,8 +119,9 @@ function FlashCard({
 function FlashCards(): JSX.Element {
   const [lang, setLang] = React.useState<Language>('en')
   const [cardIndex, setCardIndex] = React.useState(0)
+  const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
 
-  let cards = cardsMock
+  const initCards = () => setCards(cardsMock)
 
   /**
    * Register user activity on current card
@@ -136,16 +129,38 @@ function FlashCards(): JSX.Element {
   const register: Register = action => {
     if (action === 'increment') {
       cards[cardIndex].level++
+      setCards(cards)
     }
     if (action === 'decrement') {
       cards[cardIndex].level--
+      setCards(cards)
     }
     if (cards[cardIndex + 1]) {
       setCardIndex(cardIndex + 1)
     } else {
-      cards = sortCards(cards)
+      setCards(sortCards(cards))
       setCardIndex(0)
     }
+  }
+
+  if (!cards.length) {
+    return (
+      <div>
+        <p>
+          <i>
+            <b>Chào bạn!</b>
+          </i>{' '}
+          This app uses the power of AI and computer algorithms to help you
+          translate and learn Vietnamese. <i>Chúc may mắn!</i>
+        </p>
+        <div className={classes.darkPanel}>
+          <Button variant="contained" color="secondary" onClick={initCards}>
+            Get Started
+          </Button>
+          <small>Load a few flash cards suggested by AI</small>
+        </div>
+      </div>
+    )
   }
 
   return (
