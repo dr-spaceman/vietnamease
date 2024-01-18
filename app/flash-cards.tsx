@@ -1,6 +1,17 @@
 'use client'
 
-import { Button, CheckButton, CheckButtonGroup, Container } from 'matterial'
+import {
+  Button,
+  CheckButton,
+  CheckButtonGroup,
+  Container,
+  MenuProvider,
+  Menu,
+  MenuButton,
+  MenuItem,
+  Icon,
+  VisuallyHidden,
+} from 'matterial'
 import classes from './flash-cards.module.css'
 import React from 'react'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
@@ -34,23 +45,12 @@ interface Level {
   level: number
   color: string
 }
-type Register = (action: 'increment' | 'decrement' | null) => void
+type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
 
 const cardsMock: Card[] = [
-  {
-    id: 1,
-    en: 'broken rice',
-    vi: 'cơm tấm',
-    category: ['food'],
-    level: 11,
-  },
-  {
-    id: 2,
-    en: 'bicycle',
-    vi: 'xe đạp',
-    category: [],
-    level: 0,
-  },
+  { id: 1, en: 'broken rice', vi: 'cơm tấm', category: ['food'], level: 11 },
+  { id: 2, en: 'bicycle', vi: 'xe đạp', category: [], level: 0 },
+  { id: 3, en: 'good luck', vi: 'Chúc may mắn', category: [], level: -1 },
 ]
 
 function sortCards(cards: Card[]): Card[] {
@@ -76,44 +76,69 @@ function FlashCard({
   lang: Language
   register: Register
 }): JSX.Element {
-  const thisLevel = findLevel(card.level)
+  try {
+    const thisLevel = findLevel(card.level)
 
-  return (
-    <>
+    return (
+      <>
+        <div className={classes.flashCard}>
+          <big>{card[lang]}</big>
+          <small style={{ '--tag-color': `var(--color-${thisLevel.color})` }}>
+            {thisLevel.description}
+          </small>
+          <MenuProvider>
+            <MenuButton shape="circle" className={classes.menuButton}>
+              <Icon icon="Menu" aria-hidden="true" />
+              <VisuallyHidden>Card Menu</VisuallyHidden>
+            </MenuButton>
+            <Menu>
+              <MenuItem
+                onClick={() => register('delete')}
+                style={{ color: 'var(--color-error)' }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
+          </MenuProvider>
+        </div>
+        <Container row>
+          <Button
+            shape="circle"
+            variant="outlined"
+            color="success"
+            onClick={() => register('increment')}
+          >
+            :)
+          </Button>
+          <Button
+            shape="circle"
+            variant="outlined"
+            color="warning"
+            onClick={() => register(null)}
+          >
+            :|
+          </Button>
+          <Button
+            shape="circle"
+            variant="outlined"
+            color="error"
+            onClick={() => register('decrement')}
+          >
+            :(
+          </Button>
+        </Container>
+      </>
+    )
+  } catch (e) {
+    console.error(e)
+
+    return (
       <div className={classes.flashCard}>
-        <big>{card[lang]}</big>
-        <small style={{ '--tag-color': `var(--color-${thisLevel.color})` }}>
-          {thisLevel.description}
-        </small>
+        There was an error loading this card{' '}
+        <Button onClick={register}>Next card</Button>
       </div>
-      <Container row>
-        <Button
-          shape="circle"
-          variant="outlined"
-          color="success"
-          onClick={() => register('increment')}
-        >
-          :)
-        </Button>
-        <Button
-          shape="circle"
-          variant="outlined"
-          color="warning"
-          onClick={() => register(null)}
-        >
-          :|
-        </Button>
-        <Button
-          shape="circle"
-          variant="outlined"
-          color="error"
-          onClick={() => register('decrement')}
-        >
-          :(
-        </Button>
-      </Container>
-    </>
-  )
+    )
+  }
 }
 
 function FlashCards(): JSX.Element {
@@ -121,7 +146,7 @@ function FlashCards(): JSX.Element {
   const [cardIndex, setCardIndex] = React.useState(0)
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
 
-  const initCards = () => setCards(cardsMock)
+  const initCards = () => setCards(sortCards(cardsMock))
 
   /**
    * Register user activity on current card
@@ -130,18 +155,34 @@ function FlashCards(): JSX.Element {
     if (action === 'increment') {
       cards[cardIndex].level++
       setCards(cards)
-    }
-    if (action === 'decrement') {
+    } else if (action === 'decrement') {
       cards[cardIndex].level--
       setCards(cards)
+    } else if (action === 'delete') {
+      const cardsDeleted = cards.filter((_, index) => index !== cardIndex)
+      console.log('delete', cardIndex, cardsDeleted)
+      setCards(cardsDeleted)
+
+      return
     }
-    if (cards[cardIndex + 1]) {
-      setCardIndex(cardIndex + 1)
-    } else {
-      setCards(sortCards(cards))
-      setCardIndex(0)
-    }
+    setCardIndex(cardIndex + 1)
   }
+
+  const newSession = () => {
+    setCards(sortCards(cards))
+    setCardIndex(0)
+  }
+
+  const FinishedCard = () => (
+    <div className={[classes.flashCard, classes.finishedCard].join(' ')}>
+      <b>
+        <Icon icon="Success" color="success" /> <span>Finished</span>
+      </b>
+      <Button variant="contained" color="secondary" onClick={newSession}>
+        Learn Again
+      </Button>
+    </div>
+  )
 
   if (!cards.length) {
     return (
@@ -185,7 +226,14 @@ function FlashCards(): JSX.Element {
           </CheckButton>
         </CheckButtonGroup>
       </Container>
-      <FlashCard card={cards[cardIndex]} lang={lang} register={register} />
+      {!!cards[cardIndex] ? (
+        <FlashCard card={cards[cardIndex]} lang={lang} register={register} />
+      ) : (
+        <FinishedCard />
+      )}
+      <Button variant="outlined" onClick={() => setCards(cardsMock)}>
+        Reset
+      </Button>
     </Container>
   )
 }
