@@ -24,7 +24,7 @@ const LANGUAGE_MAP = {
 }
 const LANGUAGES = ['en', 'vi'] as const
 const LEVELS: Level[] = [
-  { description: 'mastery', level: 20, color: 'info' },
+  { description: 'mastered', level: 20, color: 'info' },
   { description: 'learned', level: 10, color: 'success' },
   { description: 'learning', level: 0, color: 'warning' },
   { description: 'weak', level: -3, color: 'error' },
@@ -39,6 +39,7 @@ interface Card {
   category: Array<string>
   level: number
 }
+type Languages = 'ja' | 'en' | 'vi' | 'zh' // TODO
 type Language = 'en' | 'vi' // TODO
 interface Level {
   description: string
@@ -46,6 +47,10 @@ interface Level {
   color: string
 }
 type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
+interface Preferences {
+  lang?: Language
+  hideProgress?: boolean
+}
 
 const cardsMock: Card[] = [
   { id: 1, en: 'broken rice', vi: 'cơm tấm', category: ['food'], level: 11 },
@@ -67,14 +72,23 @@ function findLevel(level: number): Level {
   return foundLevel
 }
 
+function levelCompletion(level: number): number {
+  const thisLevel = level < 0 ? 0 : level
+  const completion = (thisLevel / LEVELS[0].level) * 100
+
+  return completion
+}
+
 function FlashCard({
   card,
   lang,
   register,
+  progress,
 }: {
   card: Card
   lang: Language
   register: Register
+  progress: JSX.Element
 }): JSX.Element {
   try {
     const thisLevel = findLevel(card.level)
@@ -83,9 +97,16 @@ function FlashCard({
       <>
         <div className={classes.flashCard}>
           <big>{card[lang]}</big>
-          <small style={{ '--tag-color': `var(--color-${thisLevel.color})` }}>
+          <small
+            className={classes.level}
+            style={{
+              '--tag-color': `var(--color-${thisLevel.color})`,
+              '--completion': `${levelCompletion(card.level)}%`,
+            }}
+          >
             {thisLevel.description}
           </small>
+          {progress}
           <MenuProvider>
             <MenuButton shape="circle" className={classes.menuButton}>
               <Icon icon="Menu" aria-hidden="true" />
@@ -142,9 +163,32 @@ function FlashCard({
 }
 
 function FlashCards(): JSX.Element {
-  const [lang, setLang] = React.useState<Language>('en')
-  const [cardIndex, setCardIndex] = React.useState(0)
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
+  const [preferences, setPreferences] = useLocalStorage<Preferences>(
+    'flashcards-preferences',
+    {}
+  )
+  const [cardIndex, setCardIndex] = React.useState(0)
+  const [lang, setLang] = React.useState<Language>(preferences.lang ?? 'en')
+
+  React.useEffect(() => {
+    setPreferences({ ...preferences, ...{ lang } })
+  }, [lang]) // TODO
+
+  const Progress = React.useCallback(() => {
+    if (preferences.hideProgress) {
+      return <></>
+    }
+
+    const progress = cardIndex / cards.length
+    const pct = `${progress * 100}%`
+
+    return (
+      <div className={classes.progress} style={{ '--progress': pct }}>
+        {cardIndex + 1} / {cards.length}
+      </div>
+    )
+  }, [cardIndex, cards, preferences.hideProgress])
 
   const initCards = () => setCards(sortCards(cardsMock))
 
@@ -206,7 +250,7 @@ function FlashCards(): JSX.Element {
 
   return (
     <Container className={classes.flashCards}>
-      <Container row className={classes.controls}>
+      <div className={classes.controls}>
         <CheckButtonGroup>
           <CheckButton
             name="lang"
@@ -225,13 +269,36 @@ function FlashCards(): JSX.Element {
             {LANGUAGE_MAP[LANGUAGES[1]]}
           </CheckButton>
         </CheckButtonGroup>
-      </Container>
+        <MenuProvider>
+          <MenuButton shape="circle">
+            <Icon icon="Menu" />
+          </MenuButton>
+          <Menu>
+            <MenuItem
+              onClick={() => {
+                console.log('click menuitem')
+                setPreferences({
+                  ...preferences,
+                  ...{ hideProgress: !preferences.hideProgress },
+                })
+              }}
+            >
+              {preferences.hideProgress ? 'Show' : 'Hide'} session progress
+            </MenuItem>
+          </Menu>
+        </MenuProvider>
+      </div>
       {!!cards[cardIndex] ? (
-        <FlashCard card={cards[cardIndex]} lang={lang} register={register} />
+        <FlashCard
+          card={cards[cardIndex]}
+          lang={lang}
+          register={register}
+          progress={<Progress />}
+        />
       ) : (
         <FinishedCard />
       )}
-      <Button variant="outlined" onClick={() => setCards(cardsMock)}>
+      <Button variant="outlined" onClick={() => setCards(sortCards(cardsMock))}>
         Reset
       </Button>
     </Container>
