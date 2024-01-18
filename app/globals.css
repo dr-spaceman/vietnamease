@@ -6,6 +6,11 @@
   font-family: unset;
 }
 
+/* Better contrast with cyan */
+button.color--secondary {
+  color: rgb(57, 57, 57);
+}
+
 body {
   margin: 0;
   padding: 0;
