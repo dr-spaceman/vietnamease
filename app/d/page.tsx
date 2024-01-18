@@ -1,5 +1,4 @@
 import OpenAI from 'openai'
-import { Page } from 'matterial'
 import { Metadata, ResolvingMetadata } from 'next'
 import * as React from 'react'
 
@@ -162,8 +161,8 @@ export default async function DPage({ searchParams: { q } }: Props) {
   const data = q ? await getData(Array.isArray(q) ? q[0] : q) : null
 
   return (
-    <Page noNav>
+    <main>
       <SearchResults data={data} />
-    </Page>
+    </main>
   )
 }

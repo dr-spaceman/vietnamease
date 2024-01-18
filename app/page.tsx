@@ -1,10 +1,9 @@
-import { Page } from 'matterial'
 import FlashCards from './flash-cards'
 
 export default function HomePage() {
   return (
-    <Page noNav>
+    <main>
       <FlashCards />
-    </Page>
+    </main>
   )
 }

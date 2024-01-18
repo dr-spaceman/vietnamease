@@ -3,7 +3,18 @@
   --color-secondary-hover: #59e3f6;
   --color-primary: #f36458;
   --color-primary-hover: #f68b82;
+  --layout-h-spacing: var(--space-small);
+  --layout-v-spacing: var(--space-small);
+  --layout-max-width: 640px;
+
   font-family: unset;
+}
+
+@media screen and (min-width: 640px) {
+  :root {
+    --layout-h-spacing: var(--space-large);
+    --layout-v-spacing: var(--space-medium);
+  }
 }
 
 /* Better contrast with cyan */
@@ -13,25 +24,25 @@ button.color--secondary {
 
 body {
   margin: 0;
-  padding: 0;
+  padding: 0 var(--layout-h-spacing) var(--layout-v-spacing)
+    var(--layout-h-spacing);
+  line-height: 160%;
 }
 
 .page-header {
-  box-sizing: border-box;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding-top: var(--layout-v-spacing, var(--space-small));
-  padding-left: var(--layout-h-spacing, var(--space-small));
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: var(--layout-v-spacing) auto;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   gap: 1em;
+  position: relative;
 }
 
 @media screen and (min-width: 640px) {
   .page-header {
-    --layout-h-spacing: var(--space-large);
-    --layout-v-spacing: var(--space-medium);
+    margin-bottom: var(--space-large);
   }
 }
 
@@ -41,11 +52,26 @@ body {
   font-size: 1.3em;
   font-weight: 800;
   letter-spacing: -0.04em;
+  flex-basis: 100%;
+}
+
+@media screen and (min-width: 640px) {
+  .page-header h1 {
+    flex-basis: auto;
+  }
+}
+
+@media screen and (min-width: 960px) {
+  .page-header h1 {
+    position: absolute;
+    left: -8.5rem;
+  }
 }
 
 .page-header__search {
   position: relative;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .page-header__search button {
@@ -57,4 +83,10 @@ body {
 
 .page-header__search input {
   padding-right: calc(var(--input-padding) + 15px);
+}
+
+main {
+  width: 100%;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
 }
