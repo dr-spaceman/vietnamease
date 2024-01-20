@@ -14,6 +14,7 @@ import {
 import React from 'react'
 
 import type { Card, Language, Preferences, Register } from './types'
+import { LANGUAGES, LANGUAGE_MAP } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
@@ -83,6 +84,11 @@ function FlashCards(): JSX.Element {
       return
     }
     setCardIndex(cardIndex + 1)
+  }
+
+  const resetCards = () => {
+    setCards([])
+    setPreferences({})
   }
 
   const newSession = () => {
@@ -179,9 +185,7 @@ function FlashCards(): JSX.Element {
               />{' '}
               Hide session progress
             </MenuItem>
-            <MenuItem onClick={() => setCards(sortCards(cardsMock))}>
-              Reset (debug)
-            </MenuItem>
+            <MenuItem onClick={resetCards}>Reset (debug)</MenuItem>
           </Menu>
         </MenuProvider>
       </div>
