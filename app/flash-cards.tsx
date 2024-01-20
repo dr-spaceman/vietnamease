@@ -10,47 +10,14 @@ import {
   MenuButton,
   MenuItem,
   Icon,
-  VisuallyHidden,
 } from 'matterial'
-import classes from './flash-cards.module.css'
 import React from 'react'
+
+import type { Card, Language, Preferences, Register } from './types'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
-
-const LANGUAGE_MAP = {
-  en: 'English',
-  vi: 'Vietnamese',
-  zh: 'Chinese',
-  ja: 'Japanese',
-}
-const LANGUAGES = ['en', 'vi'] as const
-const LEVELS: Level[] = [
-  { description: 'mastered', level: 20, color: 'info' },
-  { description: 'learned', level: 10, color: 'success' },
-  { description: 'learning', level: 0, color: 'warning' },
-  { description: 'weak', level: -3, color: 'error' },
-  { description: 'critical', level: -20, color: 'error' },
-]
-
-interface Card {
-  id: number
-  // [typeof LANGUAGES as const]: string // TODO
-  en: string // TODO
-  vi: string // TODO
-  category: Array<string>
-  level: number
-}
-type Languages = 'ja' | 'en' | 'vi' | 'zh' // TODO
-type Language = 'en' | 'vi' // TODO
-interface Level {
-  description: string
-  level: number
-  color: string
-}
-type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
-interface Preferences {
-  lang?: Language
-  hideProgress?: boolean
-}
+import FlashCard from './flash-card'
+import FlashCardsStart from './flash-cards-start'
+import classes from './flash-cards.module.css'
 
 const cardsMock: Card[] = [
   { id: 1, en: 'broken rice', vi: 'cơm tấm', category: ['food'], level: 11 },
@@ -62,106 +29,6 @@ function sortCards(cards: Card[]): Card[] {
   return cards.sort((a, b) => a.level - b.level)
 }
 
-function findLevel(level: number): Level {
-  const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
-    item => level >= item.level
-  )
-  if (!foundLevel) {
-    throw new Error(`${level} level not found`)
-  }
-  return foundLevel
-}
-
-function levelCompletion(level: number): number {
-  const thisLevel = level < 0 ? 0 : level
-  const completion = (thisLevel / LEVELS[0].level) * 100
-
-  return completion
-}
-
-function FlashCard({
-  card,
-  lang,
-  register,
-  progress,
-}: {
-  card: Card
-  lang: Language
-  register: Register
-  progress: JSX.Element
-}): JSX.Element {
-  try {
-    const thisLevel = findLevel(card.level)
-
-    return (
-      <>
-        <div className={classes.flashCard}>
-          <big>{card[lang]}</big>
-          <small
-            className={classes.level}
-            style={{
-              '--tag-color': `var(--color-${thisLevel.color})`,
-              '--completion': `${levelCompletion(card.level)}%`,
-            }}
-          >
-            {thisLevel.description}
-          </small>
-          {progress}
-          <MenuProvider>
-            <MenuButton shape="circle" className={classes.menuButton}>
-              <Icon icon="Menu" aria-hidden="true" />
-              <VisuallyHidden>Card Menu</VisuallyHidden>
-            </MenuButton>
-            <Menu>
-              <MenuItem
-                onClick={() => register('delete')}
-                style={{ color: 'var(--color-error)' }}
-              >
-                Delete
-              </MenuItem>
-            </Menu>
-          </MenuProvider>
-        </div>
-        <Container row>
-          <Button
-            shape="circle"
-            variant="outlined"
-            color="success"
-            onClick={() => register('increment')}
-          >
-            :)
-          </Button>
-          <Button
-            shape="circle"
-            variant="outlined"
-            color="warning"
-            onClick={() => register(null)}
-          >
-            :|
-          </Button>
-          <Button
-            shape="circle"
-            variant="outlined"
-            color="error"
-            onClick={() => register('decrement')}
-          >
-            :(
-          </Button>
-        </Container>
-      </>
-    )
-  } catch (e) {
-    console.error(e)
-
-    return (
-      <div className={classes.flashCard}>
-        There was an error loading this card{' '}
-        <Button onClick={register}>Next card</Button>
-      </div>
-    )
-  }
-}
-
 function FlashCards(): JSX.Element {
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
   const [preferences, setPreferences] = useLocalStorage<Preferences>(
@@ -170,6 +37,7 @@ function FlashCards(): JSX.Element {
   )
   const [cardIndex, setCardIndex] = React.useState(0)
   const [lang, setLang] = React.useState<Language>(preferences.lang ?? 'en')
+  const [showCustomStart, setShowCustomStart] = React.useState(false)
 
   React.useEffect(() => {
     setPreferences({ ...preferences, ...{ lang } })
@@ -184,13 +52,18 @@ function FlashCards(): JSX.Element {
     const pct = `${progress * 100}%`
 
     return (
-      <div className={classes.progress} style={{ '--progress': pct }}>
+      <div
+        className={classes.progress}
+        style={{ '--progress': pct } as React.CSSProperties}
+      >
         {cardIndex + 1} / {cards.length}
       </div>
     )
   }, [cardIndex, cards, preferences.hideProgress])
 
-  const initCards = () => setCards(sortCards(cardsMock))
+  const quickStart = () => setCards(sortCards(cardsMock))
+
+  const customizedStart = () => setShowCustomStart(true)
 
   /**
    * Register user activity on current card
@@ -228,6 +101,17 @@ function FlashCards(): JSX.Element {
     </div>
   )
 
+  if (showCustomStart) {
+    return (
+      <FlashCardsStart
+        handleFinished={(startPreferences: Preferences) => {
+          setPreferences(startPreferences)
+          quickStart()
+        }}
+      />
+    )
+  }
+
   if (!cards.length) {
     return (
       <div>
@@ -238,12 +122,19 @@ function FlashCards(): JSX.Element {
           This app uses the power of AI and computer algorithms to help you
           translate and learn Vietnamese. <i>Chúc may mắn!</i>
         </p>
-        <div className={classes.darkPanel}>
-          <Button variant="contained" color="secondary" onClick={initCards}>
-            Get Started
+        <Container row>
+          <Button variant="contained" color="secondary" onClick={quickStart}>
+            Quick Start
           </Button>
-          <small>Load a few flash cards suggested by AI</small>
-        </div>
+          <Button
+            variant="outlined"
+            color="primary"
+            prepend={<Icon icon="settings" color="primary" />}
+            onClick={customizedStart}
+          >
+            Customized Start
+          </Button>
+        </Container>
       </div>
     )
   }
@@ -271,7 +162,7 @@ function FlashCards(): JSX.Element {
         </CheckButtonGroup>
         <MenuProvider>
           <MenuButton shape="circle">
-            <Icon icon="Menu" />
+            <Icon icon="Settings" />
           </MenuButton>
           <Menu>
             <MenuItem
@@ -283,7 +174,13 @@ function FlashCards(): JSX.Element {
                 })
               }}
             >
-              {preferences.hideProgress ? 'Show' : 'Hide'} session progress
+              <Icon
+                icon={preferences.hideProgress ? 'checkboxChecked' : 'checkbox'}
+              />{' '}
+              Hide session progress
+            </MenuItem>
+            <MenuItem onClick={() => setCards(sortCards(cardsMock))}>
+              Reset (debug)
             </MenuItem>
           </Menu>
         </MenuProvider>
@@ -298,9 +195,6 @@ function FlashCards(): JSX.Element {
       ) : (
         <FinishedCard />
       )}
-      <Button variant="outlined" onClick={() => setCards(sortCards(cardsMock))}>
-        Reset
-      </Button>
     </Container>
   )
 }
