@@ -13,17 +13,14 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import type { Card, Language, Preferences, Register } from '../types'
+import { sortCards } from '@/db'
+import type { CardsSearchParams } from '@/db/cards'
 import { LANGUAGES, LANGUAGE_MAP } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
-import { CardsSearchParams, findCardSet } from '@/mock-data/cards'
-
-function sortCards(cards: Card[]): Card[] {
-  return cards.sort((a, b) => a.level - b.level)
-}
+import { findCardSet } from '@/db/cards'
 
 function FlashCards(): JSX.Element {
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
@@ -116,26 +113,26 @@ function FlashCards(): JSX.Element {
     </div>
   )
 
-  if (showCustomStart) {
-    return (
-      <FlashCardsStart
-        handleFinished={(startPreferences: Preferences) => {
-          setPreferences(startPreferences)
-          const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
-          if (startPreferences.fluency) {
-            buildParams.push(`fluency:${startPreferences.fluency}`)
-          }
-          if (startPreferences.dialect) {
-            buildParams.push(`dialect:${startPreferences.dialect}`)
-          }
-
-          buildCardSet(buildParams)
-        }}
-      />
-    )
-  }
-
   if (!cards.length) {
+    if (showCustomStart) {
+      return (
+        <FlashCardsStart
+          handleFinished={(startPreferences: Preferences) => {
+            setPreferences(startPreferences)
+            const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
+            if (startPreferences.fluency) {
+              buildParams.push(`fluency:${startPreferences.fluency}`)
+            }
+            if (startPreferences.dialect) {
+              buildParams.push(`dialect:${startPreferences.dialect}`)
+            }
+
+            buildCardSet(buildParams)
+          }}
+        />
+      )
+    }
+
     return (
       <div>
         <p>

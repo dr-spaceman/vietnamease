@@ -7,7 +7,6 @@ import {
   SubmitRow,
   useForm,
 } from 'matterial'
-import type { Fluency } from '../types'
 
 type Form = {
   dialect: 'Hanoi' | 'Saigon'
@@ -35,7 +34,7 @@ function FlashCardsStart({
 
   return (
     <Form onSubmit={handleSubmit}>
-      <pre>{JSON.stringify(form, null, 2)}</pre>
+      {/* <pre>{JSON.stringify(form, null, 2)}</pre> */}
       <Container row>
         <CheckButtonGroup>
           <CheckButton

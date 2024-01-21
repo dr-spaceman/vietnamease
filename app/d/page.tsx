@@ -2,14 +2,16 @@ import OpenAI from 'openai'
 import { Metadata, ResolvingMetadata } from 'next'
 import * as React from 'react'
 
+import { LANGUAGES } from '@/const'
 import getEnv from '@/utils/get-env'
 import cache from '@/utils/cache'
+import extractJson from '@/utils/extract-json'
+import SearchResults from './search-results'
+import { Data, Translation } from './types'
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
 type Props = { searchParams: { [key: string]: string | string[] | undefined } }
-type Translation = { en: string; vi: string }
-type Data = Translation[] | null
 // type WikiRecord = { [key: string]: any }
 // type WikiData = WikiRecord & {
 //   error?: { code: string; info: string; '*': string }
@@ -122,8 +124,12 @@ async function getData(searchTerm: string): Promise<Data> {
     chatCompletion.choices.forEach(({ message: { content } }) => {
       console.log('chat content:', content)
       if (content) {
-        const parsedContent: Translation = JSON.parse(content)
-        if (!('en' in parsedContent) || !('vi' in parsedContent)) {
+        const parsedContent: Translation = extractJson(content)
+        if (
+          !parsedContent ||
+          !(LANGUAGES[0] in parsedContent) ||
+          !(LANGUAGES[1] in parsedContent)
+        ) {
           throw new Error(
             'There was an error serializing the search results. Please try a different phrase.'
           )
@@ -136,14 +142,6 @@ async function getData(searchTerm: string): Promise<Data> {
   cache.set(searchTerm, JSON.stringify(results))
 
   return results
-}
-
-function SearchResults({ data }: { data: Data }): JSX.Element {
-  if (!data) {
-    return <>please input a search term</>
-  }
-
-  return <pre>{JSON.stringify(data, null, 2)}</pre>
 }
 
 export async function generateMetadata(

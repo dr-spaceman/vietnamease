@@ -1,32 +1,35 @@
 import { LANGUAGE_MAP, LANGUAGES } from '@/const'
 
-type CardLang = {
-  [K in Language]: string
-}
+declare global {
+  type CardLang = {
+    /** lang: meaning, eg `cake: a succulent treat` */
+    [K in Language]: string
+  }
 
-type Card = CardLang & {
-  id: number
-  category: Array<string>
-  level: number
-}
+  type Card = CardLang & {
+    id: number
+    category: Array<string>
+    level: number
+  }
 
-type Fluency = 'beginner' | 'intermediate' | 'advanced'
+  type Fluency = 'beginner' | 'intermediate' | 'advanced'
 
-type Languages = keyof typeof LANGUAGE_MAP
+  type Languages = keyof typeof LANGUAGE_MAP
 
-type Language = (typeof LANGUAGES)[number]
+  type Language = (typeof LANGUAGES)[number]
 
-interface Level {
-  description: string
-  level: number
-  color: string
-}
+  interface Preferences {
+    lang?: Language
+    hideProgress?: boolean
+    dialect?: string
+    fluency?: Fluency
+  }
 
-type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
+  interface Level {
+    description: string
+    level: number
+    color: string
+  }
 
-interface Preferences {
-  lang?: Language
-  hideProgress?: boolean
-  dialect?: string
-  fluency?: Fluency
+  type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
 }

@@ -1,5 +1,3 @@
-import { Card, CardLang, Fluency } from '../../types'
-
 type CardsDatabase = Record<string, Card[]>
 type CardsSearchParams = Array<
   `lang:${string}` | `fluency:${Fluency}` | `dialect:${string}`
@@ -52,8 +50,10 @@ const cardsMock: CardsDatabase = {
 }
 
 function findCardSet(search: CardsSearchParams): Card[] | null {
+  console.log('find', search)
   const keys = Object.keys(cardsMock)
   const foundKey = keys.find(key => search.every(query => key.includes(query)))
+  console.log('found', foundKey)
   if (foundKey) {
     return cardsMock[foundKey]
   }
