@@ -195,16 +195,23 @@ function FlashCards(): JSX.Element {
           </MenuButton>
           <Menu>
             <MenuItem
+              hideOnClick={false}
               onClick={() => {
-                console.log('click menuitem')
                 setPreferences({
                   ...preferences,
                   ...{ hideProgress: !preferences.hideProgress },
                 })
               }}
+              style={{
+                display: 'flex',
+                flexFlow: 'row nowrap',
+                gap: '0.25em',
+                alignItems: 'center',
+              }}
             >
               <Icon
                 icon={preferences.hideProgress ? 'checkboxChecked' : 'checkbox'}
+                size={25}
               />{' '}
               Hide session progress
             </MenuItem>
