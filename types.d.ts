@@ -10,6 +10,8 @@ type Card = CardLang & {
   level: number
 }
 
+type Fluency = 'beginner' | 'intermediate' | 'advanced'
+
 type Languages = keyof typeof LANGUAGE_MAP
 
 type Language = (typeof LANGUAGES)[number]
@@ -26,5 +28,5 @@ interface Preferences {
   lang?: Language
   hideProgress?: boolean
   dialect?: string
-  fluency?: string
+  fluency?: Fluency
 }

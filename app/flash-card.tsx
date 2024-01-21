@@ -1,7 +1,7 @@
 'use client'
 
 import { LEVELS } from '@/const'
-import type { Card, Language, Level, Register } from './types'
+import type { Card, Language, Level, Register } from '../types'
 import classes from './flash-cards.module.css'
 import {
   Button,

@@ -13,18 +13,13 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import type { Card, Language, Preferences, Register } from './types'
+import type { Card, Language, Preferences, Register } from '../types'
 import { LANGUAGES, LANGUAGE_MAP } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
-
-const cardsMock: Card[] = [
-  { id: 1, en: 'broken rice', vi: 'cơm tấm', category: ['food'], level: 11 },
-  { id: 2, en: 'bicycle', vi: 'xe đạp', category: [], level: 0 },
-  { id: 3, en: 'good luck', vi: 'Chúc may mắn', category: [], level: -1 },
-]
+import { CardsSearchParams, findCardSet } from '@/mock-data/cards'
 
 function sortCards(cards: Card[]): Card[] {
   return cards.sort((a, b) => a.level - b.level)
@@ -41,7 +36,13 @@ function FlashCards(): JSX.Element {
   const [showCustomStart, setShowCustomStart] = React.useState(false)
 
   React.useEffect(() => {
+    // Don't set preferences until a card set has been created
+    if (cards.length === 0) {
+      return
+    }
+
     setPreferences({ ...preferences, ...{ lang } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]) // TODO
 
   const Progress = React.useCallback(() => {
@@ -62,7 +63,14 @@ function FlashCards(): JSX.Element {
     )
   }, [cardIndex, cards, preferences.hideProgress])
 
-  const quickStart = () => setCards(sortCards(cardsMock))
+  const buildCardSet = (params: CardsSearchParams) => {
+    const foundSet = findCardSet(params)
+    if (foundSet) {
+      setCards(foundSet)
+    } else {
+      // use AI to build a set
+    }
+  }
 
   const customizedStart = () => setShowCustomStart(true)
 
@@ -99,7 +107,8 @@ function FlashCards(): JSX.Element {
   const FinishedCard = () => (
     <div className={[classes.flashCard, classes.finishedCard].join(' ')}>
       <b>
-        <Icon icon="Success" color="success" /> <span>Finished</span>
+        <Icon icon="Success" color="success" aria-hidden="true" />
+        <span>Finished</span>
       </b>
       <Button variant="contained" color="secondary" onClick={newSession}>
         Learn Again
@@ -112,7 +121,15 @@ function FlashCards(): JSX.Element {
       <FlashCardsStart
         handleFinished={(startPreferences: Preferences) => {
           setPreferences(startPreferences)
-          quickStart()
+          const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
+          if (startPreferences.fluency) {
+            buildParams.push(`fluency:${startPreferences.fluency}`)
+          }
+          if (startPreferences.dialect) {
+            buildParams.push(`dialect:${startPreferences.dialect}`)
+          }
+
+          buildCardSet(buildParams)
         }}
       />
     )
@@ -129,7 +146,13 @@ function FlashCards(): JSX.Element {
           translate and learn Vietnamese. <i>Chúc may mắn!</i>
         </p>
         <Container row>
-          <Button variant="contained" color="secondary" onClick={quickStart}>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() =>
+              buildCardSet(['lang:en', 'lang:vi', 'fluency:beginner'])
+            }
+          >
             Quick Start
           </Button>
           <Button

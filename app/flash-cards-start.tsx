@@ -7,10 +7,11 @@ import {
   SubmitRow,
   useForm,
 } from 'matterial'
+import type { Fluency } from '../types'
 
 type Form = {
   dialect: 'Hanoi' | 'Saigon'
-  fluency: 'beginner' | 'intermediate' | 'advanced'
+  fluency: Fluency
 }
 
 type Preferences = Partial<Form>
