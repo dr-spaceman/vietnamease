@@ -222,6 +222,9 @@ function FlashCards(): JSX.Element {
           lang={lang}
           register={register}
           progress={<Progress />}
+          toggleLang={() =>
+            setLang(lang === LANGUAGES[0] ? LANGUAGES[1] : LANGUAGES[0])
+          }
         />
       ) : (
         <FinishedCard />

@@ -1,7 +1,5 @@
 'use client'
 
-import { LEVELS } from '@/const'
-import classes from './flash-cards.module.css'
 import {
   Button,
   Container,
@@ -12,6 +10,10 @@ import {
   MenuProvider,
   VisuallyHidden,
 } from 'matterial'
+import * as React from 'react'
+
+import { LEVELS } from '@/const'
+import classes from './flash-cards.module.css'
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -35,18 +37,40 @@ function FlashCard({
   lang,
   register,
   progress,
+  toggleLang,
 }: {
   card: Card
   lang: Language
   register: Register
   progress: JSX.Element
+  toggleLang: () => void
 }): JSX.Element {
   try {
+    React.useEffect(() => {
+      const handleKeyPress = (event: KeyboardEvent) => {
+        if (event.key === ' ') {
+          toggleLang()
+        } else if (event.key === 'ArrowLeft') {
+          register('decrement')
+        } else if (event.key === 'ArrowRight') {
+          register('increment')
+        } else if (event.key === 'ArrowUp') {
+          register(null)
+        }
+      }
+
+      document.addEventListener('keydown', handleKeyPress)
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyPress)
+      }
+    }, [register, toggleLang])
+
     const thisLevel = findLevel(card.level)
 
     return (
       <>
-        <div className={classes.flashCard}>
+        <div className={classes.flashCard} onClick={toggleLang}>
           <big>{card[lang]}</big>
           <small
             className={classes.level}
@@ -61,7 +85,13 @@ function FlashCard({
           </small>
           {progress}
           <MenuProvider>
-            <MenuButton shape="circle" className={classes.menuButton}>
+            <MenuButton
+              shape="circle"
+              className={classes.menuButton}
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
+                event.stopPropagation()
+              }
+            >
               <Icon icon="Menu" aria-hidden="true" />
               <VisuallyHidden>Card Menu</VisuallyHidden>
             </MenuButton>
