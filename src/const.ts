@@ -1,3 +1,5 @@
+export const FLUENCY = ['beginner', 'intermediate', 'advanced'] as const
+
 export const LANGUAGE_MAP = {
   en: 'English',
   vi: 'Vietnamese',

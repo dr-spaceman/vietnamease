@@ -71,7 +71,7 @@ function FlashCard({
     return (
       <>
         <div className={classes.flashCard} onClick={toggleLang}>
-          <big>{card[lang]}</big>
+          <big>{card.lang[lang]}</big>
           <small
             className={classes.level}
             style={

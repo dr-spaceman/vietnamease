@@ -1,28 +1,39 @@
-import { LANGUAGE_MAP, LANGUAGES } from '@/const'
+import { FLUENCY, LANGUAGE_MAP, LANGUAGES } from '@/const'
 
 declare global {
-  type CardLang = {
-    /** lang: meaning, eg `cake: a succulent treat` */
-    [K in Language]: string
-  }
+  /** lang: meaning, eg `cake: a succulent treat` */
+  type CardLang = Record<string, string> // { [K in Language]: string }
 
-  type Card = CardLang & {
+  type Card = {
     id: number
     category: Array<string>
     level: number
+    lang: CardLang
   }
-
-  type Fluency = 'beginner' | 'intermediate' | 'advanced'
 
   type Languages = keyof typeof LANGUAGE_MAP
 
-  type Language = (typeof LANGUAGES)[number]
+  type Language = string // (typeof LANGUAGES)[number]
+
+  type LanguageKit = {
+    /** The IANA language tag, eg 'en' */
+    lang: Language
+
+    /** The IANA country tag, eg 'US' */
+    country?: string
+
+    /** Application-defined dialects */
+    dialect?: string
+
+    /** The language the user wants to learn based on their own words, eg 'Southern Vietnamese', 'Okinawa Japanese' */
+    userDescription?: string
+  }
 
   interface Preferences {
-    lang?: Language
+    langNative: LanguageKit
+    langLearn: LanguageKit
+    showLang?: Language
     hideProgress?: boolean
-    dialect?: string
-    fluency?: Fluency
   }
 
   interface Level {

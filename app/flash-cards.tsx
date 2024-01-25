@@ -13,34 +13,41 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import { sortCards } from '@/db'
 import type { CardsSearchParams } from '@/db/cards'
-import { LANGUAGES, LANGUAGE_MAP } from '@/const'
+import { sortCards } from '@/db'
+import { FLUENCY, LANGUAGES, LANGUAGE_MAP } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
 import { findCardSet } from '@/db/cards'
+import useLang from '@/utils/use-lang'
+
+export type StartPreferences = {
+  dialect: 'Northern' | 'Central' | 'Southern'
+  fluency: (typeof FLUENCY)[number] | 'custom'
+  vocabList: string
+}
 
 function FlashCards(): JSX.Element {
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
-  const [preferences, setPreferences] = useLocalStorage<Preferences>(
+  const [preferences, setPreferences] = useLocalStorage<Partial<Preferences>>(
     'flashcards-preferences',
-    {}
+    { showLang: LANGUAGES[0] }
   )
   const [cardIndex, setCardIndex] = React.useState(0)
-  const [lang, setLang] = React.useState<Language>(preferences.lang ?? 'en')
+  const langKit = useLang()
   const [showCustomStart, setShowCustomStart] = React.useState(false)
 
-  React.useEffect(() => {
-    // Don't set preferences until a card set has been created
-    if (cards.length === 0) {
-      return
-    }
+  // React.useEffect(() => {
+  //   // Don't set preferences until a card set has been created
+  //   if (cards.length === 0) {
+  //     return
+  //   }
 
-    setPreferences({ ...preferences, ...{ lang } })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]) // TODO
+  //   setPreferences({ ...preferences, ...{ langNative: langKit } })
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [langKit])
 
   const Progress = React.useCallback(() => {
     if (preferences.hideProgress) {
@@ -113,18 +120,31 @@ function FlashCards(): JSX.Element {
     </div>
   )
 
+  const toggleLang = () => {
+    const showLang =
+      preferences.showLang === LANGUAGES[0] ? LANGUAGES[1] : LANGUAGES[0]
+    setPreferences({ ...preferences, showLang })
+  }
+
   if (!cards.length) {
     if (showCustomStart) {
       return (
         <FlashCardsStart
-          handleFinished={(startPreferences: Preferences) => {
-            setPreferences(startPreferences)
-            const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
-            if (startPreferences.fluency) {
-              buildParams.push(`fluency:${startPreferences.fluency}`)
+          handleFinished={(startPrefs: StartPreferences) => {
+            if (!langKit) {
+              throw new Error('No language set')
             }
-            if (startPreferences.dialect) {
-              buildParams.push(`dialect:${startPreferences.dialect}`)
+            const prefs: Preferences = {
+              langNative: langKit,
+              langLearn: { lang: 'vi', dialect: startPrefs.dialect },
+            }
+            setPreferences(prefs)
+            const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
+            if (startPrefs.fluency && startPrefs.fluency !== 'custom') {
+              buildParams.push(`fluency:${startPrefs.fluency}`)
+            }
+            if (startPrefs.dialect) {
+              buildParams.push(`dialect:${startPrefs.dialect}`)
             }
 
             buildCardSet(buildParams)
@@ -172,16 +192,22 @@ function FlashCards(): JSX.Element {
           <CheckButton
             name="lang"
             value={LANGUAGES[0]}
-            checked={lang === LANGUAGES[0]}
-            onChange={() => setLang(LANGUAGES[0])}
+            checked={
+              !preferences.showLang || preferences.showLang === LANGUAGES[0]
+            }
+            onChange={() =>
+              setPreferences({ ...preferences, showLang: LANGUAGES[0] })
+            }
           >
             {LANGUAGE_MAP[LANGUAGES[0]]}
           </CheckButton>
           <CheckButton
             name="lang"
             value={LANGUAGES[1]}
-            checked={lang === LANGUAGES[1]}
-            onChange={() => setLang(LANGUAGES[1])}
+            checked={preferences.showLang === LANGUAGES[1]}
+            onChange={() =>
+              setPreferences({ ...preferences, showLang: LANGUAGES[1] })
+            }
           >
             {LANGUAGE_MAP[LANGUAGES[1]]}
           </CheckButton>
@@ -196,7 +222,7 @@ function FlashCards(): JSX.Element {
               onClick={() => {
                 setPreferences({
                   ...preferences,
-                  ...{ hideProgress: !preferences.hideProgress },
+                  hideProgress: !preferences.hideProgress,
                 })
               }}
               style={{
@@ -219,12 +245,10 @@ function FlashCards(): JSX.Element {
       {!!cards[cardIndex] ? (
         <FlashCard
           card={cards[cardIndex]}
-          lang={lang}
+          lang={preferences.showLang || LANGUAGES[0]}
           register={register}
           progress={<Progress />}
-          toggleLang={() =>
-            setLang(lang === LANGUAGES[0] ? LANGUAGES[1] : LANGUAGES[0])
-          }
+          toggleLang={toggleLang}
         />
       ) : (
         <FinishedCard />

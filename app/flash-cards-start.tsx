@@ -5,27 +5,28 @@ import {
   Container,
   Form,
   SubmitRow,
+  TextInput,
   useForm,
 } from 'matterial'
 
-type Form = {
-  dialect: 'Hanoi' | 'Saigon'
-  fluency: Fluency
-}
+import type { StartPreferences } from './flash-cards'
+import { FLUENCY } from '@/const'
+import { capitalize } from '@/utils/string'
 
-type Preferences = Partial<Form>
+const dialects = ['Northern', 'Central', 'Southern']
 
-const initialFormVals: Form = {
-  dialect: 'Hanoi',
+const initialFormVals: StartPreferences = {
+  dialect: 'Northern',
   fluency: 'beginner',
+  vocabList: '',
 }
 
 function FlashCardsStart({
   handleFinished,
 }: {
-  handleFinished: (preferences: Preferences) => void
+  handleFinished: (preferences: StartPreferences) => void
 }) {
-  const { form, handleChange } = useForm<Form>(initialFormVals)
+  const { form, handleChange } = useForm<StartPreferences>(initialFormVals)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,49 +38,49 @@ function FlashCardsStart({
       {/* <pre>{JSON.stringify(form, null, 2)}</pre> */}
       <Container row>
         <CheckButtonGroup>
+          {FLUENCY.map(fluency => (
+            <CheckButton
+              key={fluency}
+              name="fluency"
+              value={fluency}
+              checked={form.data.fluency === fluency}
+              onChange={() => handleChange('fluency', fluency)}
+            >
+              {capitalize(fluency)}
+            </CheckButton>
+          ))}
           <CheckButton
             name="fluency"
-            value="beginner"
-            checked={form.data.fluency === 'beginner'}
-            onChange={() => handleChange('fluency', 'beginner')}
+            value="custom"
+            checked={form.data.fluency === 'custom'}
+            onChange={() => handleChange('fluency', 'custom')}
           >
-            Beginner
-          </CheckButton>
-          <CheckButton
-            name="fluency"
-            value="intermediate"
-            checked={form.data.fluency === 'intermediate'}
-            onChange={() => handleChange('fluency', 'intermediate')}
-          >
-            Intermediate
-          </CheckButton>
-          <CheckButton
-            name="fluency"
-            value="advanced"
-            checked={form.data.fluency === 'advanced'}
-            onChange={() => handleChange('fluency', 'advanced')}
-          >
-            Advanced
+            Custom List
           </CheckButton>
         </CheckButtonGroup>
       </Container>
+      {form.data.fluency === 'custom' && (
+        <TextInput
+          name="vocabList"
+          value={form.data.vocabList}
+          placeholder="List of vocabulary words or phrases"
+          multiline={true}
+          rows={3}
+          onChange={handleChange}
+        />
+      )}
       <Container row>
-        <CheckButton
-          name="dialect"
-          value="Hanoi"
-          checked={form.data.dialect === 'Hanoi'}
-          onChange={() => handleChange('dialect', 'Hanoi')}
-        >
-          Hanoi dialect
-        </CheckButton>
-        <CheckButton
-          name="dialect"
-          value="Saigon"
-          checked={form.data.dialect === 'Saigon'}
-          onChange={() => handleChange('dialect', 'Saigon')}
-        >
-          Saigon dialect
-        </CheckButton>
+        {dialects.map(dialect => (
+          <CheckButton
+            key={dialect}
+            name="dialect"
+            value={dialect}
+            checked={form.data.dialect === dialect}
+            onChange={() => handleChange('dialect', dialect)}
+          >
+            {dialect} dialect
+          </CheckButton>
+        ))}
       </Container>
       <SubmitRow>
         <Button type="submit" variant="contained" color="primary">

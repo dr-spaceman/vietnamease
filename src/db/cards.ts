@@ -1,17 +1,20 @@
+import { FLUENCY } from '@/const'
+
 type CardsDatabase = Record<string, Card[]>
 type CardsSearchParams = Array<
   `lang:${string}` | `fluency:${Fluency}` | `dialect:${string}`
 >
+type Fluency = (typeof FLUENCY)[number]
 
 const mapMockCard = (partialCard: CardLang, index: number): Card => ({
   id: index,
-  ...partialCard,
+  lang: partialCard,
   level: 0,
   category: [],
 })
 
 const cardsMock: CardsDatabase = {
-  'lang:en lang:vi fluency:beginner dialect:Saigon': [
+  'lang:en lang:vi fluency:beginner dialect:Southern': [
     { en: 'hello', vi: 'xin chào' },
     { en: 'goodbye', vi: 'tạm biệt' },
     { en: 'thank you', vi: 'cảm ơn' },
@@ -23,7 +26,7 @@ const cardsMock: CardsDatabase = {
     { en: 'how are you?', vi: 'bạn khỏe không?' },
     { en: 'my name is', vi: 'tên tôi là' },
   ].map(mapMockCard),
-  'lang:en lang:vi fluency:intermediate dialect:Saigon': [
+  'lang:en lang:vi fluency:intermediate dialect:Southern': [
     { en: 'delicious', vi: 'ngon' },
     { en: 'beautiful', vi: 'đẹp' },
     { en: 'interesting', vi: 'thú vị' },
@@ -35,7 +38,7 @@ const cardsMock: CardsDatabase = {
     { en: 'friendship', vi: 'tình bạn' },
     { en: 'to travel', vi: 'du lịch' },
   ].map(mapMockCard),
-  'lang:en lang:vi fluency:advanced dialect:Saigon': [
+  'lang:en lang:vi fluency:advanced dialect:Southern': [
     { en: 'to recommend', vi: 'khuyến nghị' },
     { en: 'to adapt', vi: 'thích ứng' },
     { en: 'efficient', vi: 'hiệu quả' },
