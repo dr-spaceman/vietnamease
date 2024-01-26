@@ -18,7 +18,8 @@ export default function Error({
   return (
     <Page noNav>
       <h2>Something went wrong :(</h2>
-      <Button
+      <p>{error.message}</p>
+      {/* <Button
         variant="outlined"
         onClick={
           // Attempt to recover by trying to re-render the segment
@@ -26,7 +27,7 @@ export default function Error({
         }
       >
         Try again
-      </Button>
+      </Button> */}
     </Page>
   )
 }

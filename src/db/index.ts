@@ -22,7 +22,7 @@ function getCards(): Card[] {
 function addCard(lang: CardLang) {
   console.log('add card', lang)
   const cards = getCards()
-  const newCard: Card = { id: cards.length, ...lang, level: 0, category: [] }
+  const newCard: Card = { id: cards.length, lang, level: 0, category: [] }
   const newCardSet = [newCard, ...cards]
   console.log('new cards set', newCardSet)
   window.localStorage.setItem('cards', JSON.stringify(newCardSet))

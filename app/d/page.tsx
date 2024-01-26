@@ -2,12 +2,12 @@ import OpenAI from 'openai'
 import { Metadata, ResolvingMetadata } from 'next'
 import * as React from 'react'
 
+import type { Data, Translation } from './types'
 import { LANGUAGES } from '@/const'
 import getEnv from '@/utils/get-env'
 import cache from '@/utils/cache'
 import extractJson from '@/utils/extract-json'
 import SearchResults from './search-results'
-import { Data, Translation } from './types'
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
@@ -125,13 +125,14 @@ async function getData(searchTerm: string): Promise<Data> {
       console.log('chat content:', content)
       if (content) {
         const parsedContent: Translation = extractJson(content)
+        console.log('parsed content', parsedContent)
         if (
           !parsedContent ||
           !(LANGUAGES[0] in parsedContent) ||
           !(LANGUAGES[1] in parsedContent)
         ) {
           throw new Error(
-            'There was an error serializing the search results. Please try a different phrase.'
+            `The translation service couldn't find any results for '${searchTerm}', or there were errors serializing the results into usable data. Please try a different phrase.`
           )
         }
         results.push(parsedContent)
