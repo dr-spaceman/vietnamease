@@ -7,14 +7,9 @@ import * as React from 'react'
 import type { Data, Translation } from './types'
 import classes from './d.module.css'
 import { addCard } from '@/db'
+import delay from '@/utils/delay'
 
 type State = { loading?: boolean; complete?: boolean; error?: string }
-
-function delay(interval: number) {
-  return new Promise(function (resolve) {
-    return setTimeout(resolve, interval)
-  })
-}
 
 function SearchResults({ data }: { data: Data }): JSX.Element {
   const router = useRouter()

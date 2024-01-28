@@ -1,5 +1,7 @@
+'use client'
+
 import {
-  Button,
+  Alert,
   CheckButton,
   CheckButtonGroup,
   Container,
@@ -8,10 +10,16 @@ import {
   TextInput,
   useForm,
 } from 'matterial'
+import React from 'react'
+import { useFormState } from 'react-dom'
 
 import type { StartPreferences } from './flash-cards'
 import { FLUENCY } from '@/const'
 import { capitalize } from '@/utils/string'
+import useLang from '@/utils/use-lang'
+import { addCard, getCards } from '@/db'
+import { buildCards } from './actions'
+import { SubmitButton } from '@/components/submit-button'
 
 const dialects = ['Northern', 'Central', 'Southern']
 
@@ -22,20 +30,51 @@ const initialFormVals: StartPreferences = {
 }
 
 function FlashCardsStart({
-  handleFinished,
+  setPreferences,
+  setCards,
 }: {
-  handleFinished: (preferences: StartPreferences) => void
+  setPreferences: (prefs: Partial<Preferences>) => void
+  setCards: (cards: Card[]) => void
 }) {
+  const [state, formAction] = useFormState(buildCards, null)
   const { form, handleChange } = useForm<StartPreferences>(initialFormVals)
+  const langKit = useLang()
+
+  React.useEffect(() => {
+    if (state?.success) {
+      if (state?.cards?.length) {
+        setCards(state.cards)
+      } else if (state?.translations?.length) {
+        state.translations.forEach(translation => addCard(translation))
+        const cards = getCards()
+        setCards(cards)
+      } else {
+        throw new Error('No cards were found on the server')
+      }
+    }
+  }, [state, setCards])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    handleFinished(form.data)
+    if (!langKit) {
+      throw new Error('No language set')
+    }
+
+    if (form.data.fluency === 'custom' && form.data.vocabList?.trim() === '') {
+      e.preventDefault()
+    }
+
+    const prefs: Preferences = {
+      langNative: langKit,
+      langLearn: { lang: 'vi', dialect: form.data.dialect },
+    }
+    setPreferences(prefs)
   }
 
   return (
-    <Form onSubmit={handleSubmit}>
-      {/* <pre>{JSON.stringify(form, null, 2)}</pre> */}
+    <Form onSubmit={handleSubmit} action={formAction}>
+      {state?.success === false && (
+        <Alert severity="error">{state.error || 'Something went wrong'}</Alert>
+      )}
       <Container row>
         <CheckButtonGroup>
           {FLUENCY.map(fluency => (
@@ -83,9 +122,9 @@ function FlashCardsStart({
         ))}
       </Container>
       <SubmitRow>
-        <Button type="submit" variant="contained" color="primary">
+        <SubmitButton variant="contained" color="primary">
           Submit
-        </Button>
+        </SubmitButton>
       </SubmitRow>
     </Form>
   )

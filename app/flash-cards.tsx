@@ -26,7 +26,7 @@ import useLang from '@/utils/use-lang'
 export type StartPreferences = {
   dialect: 'Northern' | 'Central' | 'Southern'
   fluency: (typeof FLUENCY)[number] | 'custom'
-  vocabList: string
+  vocabList?: string
 }
 
 function FlashCards(): JSX.Element {
@@ -67,16 +67,14 @@ function FlashCards(): JSX.Element {
     )
   }, [cardIndex, cards, preferences.hideProgress])
 
-  const buildCardSet = (params: CardsSearchParams) => {
-    const foundSet = findCardSet(params)
+  const quickStart = () => {
+    const foundSet = findCardSet(['lang:en', 'lang:vi', 'fluency:beginner'])
     if (foundSet) {
       setCards(foundSet)
     } else {
-      // use AI to build a set
+      throw new Error('Error building from data preset')
     }
   }
-
-  const customizedStart = () => setShowCustomStart(true)
 
   /**
    * Register user activity on current card
@@ -129,27 +127,7 @@ function FlashCards(): JSX.Element {
   if (!cards.length) {
     if (showCustomStart) {
       return (
-        <FlashCardsStart
-          handleFinished={(startPrefs: StartPreferences) => {
-            if (!langKit) {
-              throw new Error('No language set')
-            }
-            const prefs: Preferences = {
-              langNative: langKit,
-              langLearn: { lang: 'vi', dialect: startPrefs.dialect },
-            }
-            setPreferences(prefs)
-            const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
-            if (startPrefs.fluency && startPrefs.fluency !== 'custom') {
-              buildParams.push(`fluency:${startPrefs.fluency}`)
-            }
-            if (startPrefs.dialect) {
-              buildParams.push(`dialect:${startPrefs.dialect}`)
-            }
-
-            buildCardSet(buildParams)
-          }}
-        />
+        <FlashCardsStart setPreferences={setPreferences} setCards={setCards} />
       )
     }
 
@@ -163,20 +141,14 @@ function FlashCards(): JSX.Element {
           translate and learn Vietnamese. <i>Chúc may mắn!</i>
         </p>
         <Container row>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() =>
-              buildCardSet(['lang:en', 'lang:vi', 'fluency:beginner'])
-            }
-          >
+          <Button variant="contained" color="secondary" onClick={quickStart}>
             Quick Start
           </Button>
           <Button
             variant="outlined"
             color="primary"
             prepend={<Icon icon="settings" color="primary" />}
-            onClick={customizedStart}
+            onClick={() => setShowCustomStart(true)}
           >
             Customized Start
           </Button>
