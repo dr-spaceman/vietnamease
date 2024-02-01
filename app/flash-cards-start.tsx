@@ -17,9 +17,10 @@ import type { StartPreferences } from './flash-cards'
 import { FLUENCY } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
-import { addCard, getCards } from '@/db'
+import { addCard, getCards, sortCards } from '@/db/cards'
 import { buildCards } from './actions'
 import { SubmitButton } from '@/components/submit-button'
+import CardsContext from '@/contexts/cards-context'
 
 const dialects = ['Northern', 'Central', 'Southern']
 
@@ -31,23 +32,20 @@ const initialFormVals: StartPreferences = {
 
 function FlashCardsStart({
   setPreferences,
-  setCards,
 }: {
   setPreferences: (prefs: Partial<Preferences>) => void
-  setCards: (cards: Card[]) => void
 }) {
   const [state, formAction] = useFormState(buildCards, null)
   const { form, handleChange } = useForm<StartPreferences>(initialFormVals)
   const langKit = useLang()
+  const [_, setCards] = React.useContext(CardsContext)
 
   React.useEffect(() => {
     if (state?.success) {
-      if (state?.cards?.length) {
-        setCards(state.cards)
-      } else if (state?.translations?.length) {
+      if (state?.translations?.length) {
         state.translations.forEach(translation => addCard(translation))
         const cards = getCards()
-        setCards(cards)
+        setCards(sortCards(cards))
       } else {
         throw new Error('No cards were found on the server')
       }

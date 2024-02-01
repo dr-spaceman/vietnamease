@@ -1,14 +1,19 @@
 import { FLUENCY, LANGUAGE_MAP, LANGUAGES } from '@/const'
 
 declare global {
-  /** lang: meaning, eg `cake: a succulent treat` */
-  type CardLang = Record<string, string> // { [K in Language]: string }
-
   type Card = {
-    id: number
+    /** A UUID */
+    id: string
+
+    /** User's categories for this card */
     category: Array<string>
+
+    /** A numeric value representing the user's level of mastery, or lack
+     *  thereof */
     level: number
-    lang: CardLang
+
+    /** Meanings and translations */
+    lang: Translation
   }
 
   type Languages = keyof typeof LANGUAGE_MAP
@@ -16,7 +21,7 @@ declare global {
   type Language = string // (typeof LANGUAGES)[number]
 
   type LanguageKit = {
-    /** The IANA language tag, eg 'en' */
+    /** The IANA language tag, eg 'en', without the country tag */
     lang: Language
 
     /** The IANA country tag, eg 'US' */
@@ -25,7 +30,8 @@ declare global {
     /** Application-defined dialects */
     dialect?: string
 
-    /** The language the user wants to learn based on their own words, eg 'Southern Vietnamese', 'Okinawa Japanese' */
+    /** The language the user wants to learn based on their own words, eg
+     *  'Southern Vietnamese', 'Okinawa Japanese', 'British English' */
     userDescription?: string
   }
 
@@ -42,5 +48,9 @@ declare global {
     color: string
   }
 
+  /** User actions on a card */
   type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
+
+  /** @example { en: 'beautiful', vi: 'đẹp' } */
+  type Translation = { [K in Language]: string }
 }

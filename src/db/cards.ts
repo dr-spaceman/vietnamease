@@ -1,69 +1,81 @@
-import { FLUENCY } from '@/const'
+// Client-only methods for cards management
 
-type CardsDatabase = Record<string, Card[]>
-type CardsSearchParams = Array<
-  `lang:${string}` | `fluency:${Fluency}` | `dialect:${string}`
->
-type Fluency = (typeof FLUENCY)[number]
+import uuid from '@/utils/uuid'
 
-const mapMockCard = (partialCard: CardLang, index: number): Card => ({
-  id: index,
-  lang: partialCard,
-  level: 0,
-  category: [],
-})
+function sortCards(cards: Card[]): Card[] {
+  const sortedCards: Card[] = cards.sort((a, b) => a.level - b.level)
 
-const cardsMock: CardsDatabase = {
-  'lang:en lang:vi fluency:beginner dialect:Southern': [
-    { en: 'hello', vi: 'xin chào' },
-    { en: 'goodbye', vi: 'tạm biệt' },
-    { en: 'thank you', vi: 'cảm ơn' },
-    { en: 'please', vi: 'làm ơn' },
-    { en: 'yes', vi: 'vâng' },
-    { en: 'no', vi: 'không' },
-    { en: 'excuse me', vi: 'xin lỗi' },
-    { en: 'sorry', vi: 'xin lỗi' },
-    { en: 'how are you?', vi: 'bạn khỏe không?' },
-    { en: 'my name is', vi: 'tên tôi là' },
-  ].map(mapMockCard),
-  'lang:en lang:vi fluency:intermediate dialect:Southern': [
-    { en: 'delicious', vi: 'ngon' },
-    { en: 'beautiful', vi: 'đẹp' },
-    { en: 'interesting', vi: 'thú vị' },
-    { en: 'to understand', vi: 'hiểu' },
-    { en: 'to explain', vi: 'giải thích' },
-    { en: 'to practice', vi: 'luyện tập' },
-    { en: 'to improve', vi: 'cải thiện' },
-    { en: 'conversation', vi: 'cuộc trò chuyện' },
-    { en: 'friendship', vi: 'tình bạn' },
-    { en: 'to travel', vi: 'du lịch' },
-  ].map(mapMockCard),
-  'lang:en lang:vi fluency:advanced dialect:Southern': [
-    { en: 'to recommend', vi: 'khuyến nghị' },
-    { en: 'to adapt', vi: 'thích ứng' },
-    { en: 'efficient', vi: 'hiệu quả' },
-    { en: 'to prioritize', vi: 'ưu tiên' },
-    { en: 'flexibility', vi: 'linh hoạt' },
-    { en: 'to collaborate', vi: 'hợp tác' },
-    { en: 'to appreciate', vi: 'đánh giá cao' },
-    { en: 'to overcome challenges', vi: 'vượt qua thách thức' },
-    { en: 'productive', vi: 'năng suất' },
-    { en: 'to achieve goals', vi: 'đạt được mục tiêu' },
-  ].map(mapMockCard),
+  return sortedCards
 }
 
-function findCardSet(search: CardsSearchParams): Card[] | null {
-  console.log('find', search)
-  const keys = Object.keys(cardsMock)
-  const foundKey = keys.find(key => search.every(query => key.includes(query)))
-  console.log('found', foundKey)
-  if (foundKey) {
-    return cardsMock[foundKey]
+/**
+ * Returns the current, unsorted collection of cards.
+ */
+function getCards(): Card[] {
+  const cardsString = window.localStorage.getItem('cards')
+  if (!cardsString) {
+    return []
+  }
+  const cards: Card[] = JSON.parse(cardsString)
+  if (Array.isArray(cards) === false) {
+    throw new Error('There was an error getting cards')
   }
 
-  return null
+  return cards
 }
 
-export default cardsMock
-export { findCardSet }
-export type { CardsSearchParams }
+/**
+ * Parse and unshift a new card to the front of the collection.
+ */
+function addCard(lang: Translation): Card[] {
+  console.log('add card', lang)
+  const cards = getCards()
+  const newCard: Card = { id: uuid(), lang, level: 0, category: [] }
+  const newCards: Card[] = [newCard, ...cards]
+  console.log('new cards set', newCards)
+
+  return newCards
+}
+
+/**
+ * Parse and unshift a new card to the front of the collection.
+ */
+function addCards(translations: Translation[]): Card[] {
+  const oldCards = getCards()
+  const newCards: Card[] = translations.map(translation => ({
+    id: uuid(),
+    lang: translation,
+    level: 0,
+    category: [],
+  }))
+  const newSet: Card[] = [...newCards, ...oldCards]
+
+  return newSet
+}
+
+/**
+ * Edit a card in the collection.
+ */
+function editCard(id: Card['id'], newCard: Card): Card[] {
+  console.log('edit card', id, newCard)
+  const cards = getCards()
+  let numEdited = 0
+  const cardsEdited: Card[] = cards.map(card => {
+    if (card.id === id) {
+      numEdited++
+      console.log('matching card', card)
+      return newCard
+    }
+
+    return card
+  })
+
+  console.log('edited cards', cardsEdited, cards)
+  if (numEdited === 0) {
+    throw new Error(`No cards matching id '${id}'`)
+  }
+
+  return cardsEdited
+}
+
+export { addCard, addCards, editCard, getCards, sortCards }

@@ -13,15 +13,14 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import type { CardsSearchParams } from '@/db/cards'
-import { sortCards } from '@/db'
 import { FLUENCY, LANGUAGES, LANGUAGE_MAP } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
-import { findCardSet } from '@/db/cards'
-import useLang from '@/utils/use-lang'
+import { findTranslationSet } from '@/db/translations'
+import { addCards, sortCards } from '@/db/cards'
+import CardsContext from '@/contexts/cards-context'
 
 export type StartPreferences = {
   dialect: 'Northern' | 'Central' | 'Southern'
@@ -36,7 +35,6 @@ function FlashCards(): JSX.Element {
     { showLang: LANGUAGES[0] }
   )
   const [cardIndex, setCardIndex] = React.useState(0)
-  const langKit = useLang()
   const [showCustomStart, setShowCustomStart] = React.useState(false)
 
   // React.useEffect(() => {
@@ -68,9 +66,14 @@ function FlashCards(): JSX.Element {
   }, [cardIndex, cards, preferences.hideProgress])
 
   const quickStart = () => {
-    const foundSet = findCardSet(['lang:en', 'lang:vi', 'fluency:beginner'])
+    const foundSet = findTranslationSet([
+      'lang:en',
+      'lang:vi',
+      'fluency:beginner',
+    ])
     if (foundSet) {
-      setCards(foundSet)
+      const cards = addCards(foundSet)
+      setCards(cards)
     } else {
       throw new Error('Error building from data preset')
     }
@@ -80,6 +83,7 @@ function FlashCards(): JSX.Element {
    * Register user activity on current card
    */
   const register: Register = action => {
+    console.log('register', action)
     if (action === 'increment') {
       cards[cardIndex].level++
       setCards(cards)
@@ -99,6 +103,7 @@ function FlashCards(): JSX.Element {
   const resetCards = () => {
     setCards([])
     setPreferences({})
+    setCardIndex(0)
   }
 
   const newSession = () => {
@@ -126,9 +131,7 @@ function FlashCards(): JSX.Element {
 
   if (!cards.length) {
     if (showCustomStart) {
-      return (
-        <FlashCardsStart setPreferences={setPreferences} setCards={setCards} />
-      )
+      return <FlashCardsStart setPreferences={setPreferences} />
     }
 
     return (
@@ -215,13 +218,15 @@ function FlashCards(): JSX.Element {
         </MenuProvider>
       </div>
       {!!cards[cardIndex] ? (
-        <FlashCard
-          card={cards[cardIndex]}
-          lang={preferences.showLang || LANGUAGES[0]}
-          register={register}
-          progress={<Progress />}
-          toggleLang={toggleLang}
-        />
+        <CardsContext.Provider value={[cards, setCards]}>
+          <FlashCard
+            card={cards[cardIndex]}
+            lang={preferences.showLang || LANGUAGES[0]}
+            register={register}
+            progress={<Progress />}
+            toggleLang={toggleLang}
+          />
+        </CardsContext.Provider>
       ) : (
         <FinishedCard />
       )}

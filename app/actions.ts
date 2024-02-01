@@ -3,16 +3,17 @@
 import OpenAI from 'openai'
 
 import type { StartPreferences } from './flash-cards'
-import type { Translation } from './d/types'
 import { LANGUAGES, LANGUAGE_MAP } from '@/const'
-import { findCardSet, type CardsSearchParams } from '@/db/cards'
+import {
+  findTranslationSet,
+  type TranslationSearchParams,
+} from '@/db/translations'
 import delay from '@/utils/delay'
 import getEnv from '@/utils/get-env'
 
 type ResponseSuccess = {
   success: true
-  cards?: Card[]
-  translations?: Translation[]
+  translations: Translation[]
 }
 type ResponseFail = { success: false; error: string }
 export type Response = ResponseSuccess | ResponseFail | null
@@ -45,7 +46,7 @@ async function buildCards(
     console.log(params, formData, prevState)
 
     if (params.fluency !== 'custom') {
-      const buildParams: CardsSearchParams = ['lang:en', 'lang:vi']
+      const buildParams: TranslationSearchParams = ['lang:en', 'lang:vi']
       if (params.fluency) {
         buildParams.push(`fluency:${params.fluency}`)
       }
@@ -53,11 +54,11 @@ async function buildCards(
         buildParams.push(`dialect:${params.dialect}`)
       }
 
-      const foundSet = findCardSet(buildParams)
+      const foundSet = findTranslationSet(buildParams)
       if (foundSet) {
         await delay(500) // Simulate busy
 
-        return { success: true, cards: foundSet }
+        return { success: true, translations: foundSet }
       }
     }
 
