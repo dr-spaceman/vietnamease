@@ -1,8 +1,8 @@
 import * as React from 'react'
 
 let cards: Card[] = []
-const setCards = (newCardSet: Card[]) => {
-  cards = newCardSet
+const setCards = () => {
+  console.warn('Not implemented')
 }
 
 const CardsContext = React.createContext<

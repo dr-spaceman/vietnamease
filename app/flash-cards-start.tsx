@@ -17,7 +17,7 @@ import type { StartPreferences } from './flash-cards'
 import { FLUENCY } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
-import { addCard, getCards, sortCards } from '@/db/cards'
+import { addCards } from '@/db/cards'
 import { buildCards } from './actions'
 import { SubmitButton } from '@/components/submit-button'
 import CardsContext from '@/contexts/cards-context'
@@ -43,9 +43,8 @@ function FlashCardsStart({
   React.useEffect(() => {
     if (state?.success) {
       if (state?.translations?.length) {
-        state.translations.forEach(translation => addCard(translation))
-        const cards = getCards()
-        setCards(sortCards(cards))
+        const cards = addCards(state.translations)
+        setCards(cards)
       } else {
         throw new Error('No cards were found on the server')
       }

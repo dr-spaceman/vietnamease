@@ -131,7 +131,11 @@ function FlashCards(): JSX.Element {
 
   if (!cards.length) {
     if (showCustomStart) {
-      return <FlashCardsStart setPreferences={setPreferences} />
+      return (
+        <CardsContext.Provider value={[cards, setCards]}>
+          <FlashCardsStart setPreferences={setPreferences} />
+        </CardsContext.Provider>
+      )
     }
 
     return (
