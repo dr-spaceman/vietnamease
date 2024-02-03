@@ -72,6 +72,15 @@ function FlashCard({
 
   const thisLevel = findLevel(card.level)
 
+  const stopBubbling = (action?: string) => (event: React.MouseEvent) => {
+    event.stopPropagation()
+    if (action === 'setEdit') {
+      setEdit(true)
+    } else if (action === 'delete') {
+      register('delete')
+    }
+  }
+
   if (edit) {
     return <FlashCardEdit card={card} onFinish={() => setEdit(false)} />
   }
@@ -96,17 +105,15 @@ function FlashCard({
           <MenuButton
             shape="circle"
             className={classes.menuButton}
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) =>
-              event.stopPropagation()
-            }
+            onClick={stopBubbling()}
           >
             <Icon icon="Menu" aria-hidden="true" />
             <VisuallyHidden>Card Menu</VisuallyHidden>
           </MenuButton>
           <Menu>
-            <MenuItem onClick={() => setEdit(true)}>Edit</MenuItem>
+            <MenuItem onClick={stopBubbling('setEdit')}>Edit</MenuItem>
             <MenuItem
-              onClick={() => register('delete')}
+              onClick={stopBubbling('delete')}
               style={{ color: 'var(--color-error)' }}
             >
               Delete
