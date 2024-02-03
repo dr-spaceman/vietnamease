@@ -13,13 +13,13 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import { FLUENCY, LANGUAGES, LANGUAGE_MAP } from '@/const'
+import { FLUENCY, LANGUAGES, LANGUAGE_MAP, LEVELS } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
 import { findTranslationSet } from '@/db/translations'
-import { addCards, sortCards } from '@/db/cards'
+import { addCards, getCards, sortCards } from '@/db/cards'
 import CardsContext from '@/contexts/cards-context'
 
 export type StartPreferences = {
@@ -27,6 +27,9 @@ export type StartPreferences = {
   fluency: (typeof FLUENCY)[number] | 'custom'
   vocabList?: string
 }
+
+const masteredLevel =
+  LEVELS.find(level => level.description === 'mastered')?.level || 20
 
 function FlashCards(): JSX.Element {
   const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
@@ -36,6 +39,7 @@ function FlashCards(): JSX.Element {
   )
   const [cardIndex, setCardIndex] = React.useState(0)
   const [showCustomStart, setShowCustomStart] = React.useState(false)
+  let numMastered = React.useRef(0)
 
   // React.useEffect(() => {
   //   // Don't set preferences until a card set has been created
@@ -86,6 +90,9 @@ function FlashCards(): JSX.Element {
     console.log('register', action)
     if (action === 'increment') {
       cards[cardIndex].level++
+      if (cards[cardIndex].level === masteredLevel) {
+        numMastered.current++
+      }
       setCards(cards)
     } else if (action === 'decrement') {
       cards[cardIndex].level--
@@ -104,22 +111,37 @@ function FlashCards(): JSX.Element {
     setCards([])
     setPreferences({})
     setCardIndex(0)
+    numMastered.current = 0
   }
 
   const newSession = () => {
-    setCards(sortCards(cards))
+    setCards(sortCards(getCards()))
     setCardIndex(0)
+    numMastered.current = 0
   }
 
   const FinishedCard = () => (
-    <div className={[classes.flashCard, classes.finishedCard].join(' ')}>
+    <div
+      className={[classes.flashCard, classes.finishedCard].join(' ')}
+      onClick={newSession}
+    >
       <b>
-        <Icon icon="Success" color="success" aria-hidden="true" />
+        <Icon icon="Success" aria-hidden="true" />
         <span>Finished</span>
       </b>
-      <Button variant="contained" color="secondary" onClick={newSession}>
-        Learn Again
-      </Button>
+      {numMastered.current ? (
+        <div className={classes.mastered}>
+          You mastered {numMastered.current} card
+          {numMastered.current > 1 && 's'}
+        </div>
+      ) : undefined}
+      {numMastered.current && cards.length <= numMastered.current ? (
+        <>You mastered everything ᕕ( ᐛ )ᕗ</>
+      ) : (
+        <Button variant="contained" color="secondary" onClick={newSession}>
+          Learn Again
+        </Button>
+      )}
     </div>
   )
 

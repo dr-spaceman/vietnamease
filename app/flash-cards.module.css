@@ -80,6 +80,12 @@
   display: flex;
   gap: 0.2em;
   align-items: center;
+  font-size: x-large;
+}
+
+.mastered {
+  color: var(--color-primary);
+  font-weight: bolder;
 }
 
 .menuButton {

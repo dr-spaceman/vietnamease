@@ -1,5 +1,6 @@
 // Client-only methods for cards management
 
+import { LEVELS } from '@/const'
 import uuid from '@/utils/uuid'
 
 function sortCards(cards: Card[]): Card[] {
@@ -21,7 +22,49 @@ function getCards(): Card[] {
     throw new Error('There was an error getting cards')
   }
 
-  return cards
+  const masteredLevel =
+    LEVELS.find(level => level.description === 'mastered')?.level || 20
+  let cardsNotMastered: Card[] = []
+  let cardsMastered: Card[] = []
+  for (const card of cards) {
+    if (card.level < masteredLevel) {
+      cardsNotMastered.push(card)
+    } else {
+      cardsMastered.push(card)
+    }
+  }
+
+  // Add some mastered cards to the session?
+
+  let cardsFinal: Card[]
+  try {
+    if (cardsMastered.length) {
+      const cardsMasteredOldString =
+        window.localStorage.getItem('cards-mastered')
+      if (cardsMasteredOldString) {
+        const cardsMasteredOld = JSON.parse(cardsMasteredOldString)
+        if (Array.isArray(cardsMasteredOld) === false) {
+          throw new Error(
+            'Old mastered cards is not an array. Possibly corrupt'
+          )
+        }
+
+        window.localStorage.setItem(
+          'cards-mastered',
+          JSON.stringify([...cardsMasteredOld, ...cardsMastered])
+        )
+      }
+    }
+    cardsFinal = cardsNotMastered
+  } catch (e: unknown) {
+    console.warn(
+      'Could not save mastered cards to local storage; Keeping them in the active session so they are not lost',
+      String(e)
+    )
+    cardsFinal = [...cardsNotMastered, ...cardsMastered]
+  }
+
+  return cardsFinal
 }
 
 /**
