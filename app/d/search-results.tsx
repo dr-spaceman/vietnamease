@@ -52,10 +52,8 @@ function SearchResults({ data }: { data: Data }): JSX.Element {
           <Button
             variant={state.complete ? 'contained' : 'outlined'}
             color={state.complete ? 'success' : 'primary'}
-            prepend={
-              state.complete ? <Icon icon="success" /> : <Icon icon="plus" />
-            }
-            width={250}
+            prepend={state.complete ? <Icon icon="success" /> : undefined}
+            width="100%"
             disabled={state.loading || state.complete}
             loading={state.loading}
             className={classes.addButton}

@@ -1,6 +1,8 @@
 function extractJson(inputString: string) {
   try {
-    const jsonMatch = inputString.match(/\{.*\}|\[.*\]/)
+    const jsonMatch = inputString
+      .replace(/(?:\r\n|\r|\n)/g, '')
+      .match(/\{.*\}|\[.*\]/)
 
     if (jsonMatch) {
       const jsonString = jsonMatch[0]
