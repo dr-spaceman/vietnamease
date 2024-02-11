@@ -15,11 +15,11 @@ const useLocalStorage = <T,>(
       const item = window.localStorage.getItem(key)
 
       if (item) {
-        // console.log('load from localstorage', key, item)
+        console.log('load from localstorage', key, item)
         return deserialize(item)
       }
 
-      // console.log('using initial value', initialValue)
+      console.log('using initial value', initialValue)
       return initialValue
     } catch (error) {
       return initialValue
@@ -38,7 +38,7 @@ const useLocalStorage = <T,>(
     try {
       setStoredValue(value)
       window.localStorage.setItem(key, serialize(value))
-      // console.log('wrote to localstorage', key, serialize(value))
+      console.log('wrote to localstorage', key, serialize(value))
     } catch (error) {
       console.error(`Error setting localStorage value for key '${key}'`)
       console.error(error)

@@ -5,7 +5,7 @@ import * as React from 'react'
 
 import classes from './flash-cards.module.css'
 import { LANGUAGES, LANGUAGE_MAP } from '@/const'
-import { editCard } from '@/db/cards'
+import { saveCard } from '@/db/cards'
 import CardsContext from '@/contexts/cards-context'
 
 function FlashCardEdit({
@@ -15,7 +15,7 @@ function FlashCardEdit({
   card: Card
   onFinish: () => void
 }) {
-  const [_, setCards] = React.useContext(CardsContext)
+  const [cards, setCards] = React.useContext(CardsContext)
   const [state, setState] = React.useState<Card>(card)
 
   const handleChange = (index: number) => (e: any) =>
@@ -26,8 +26,9 @@ function FlashCardEdit({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newCardSet = editCard(card.id, state)
-    setCards(newCardSet)
+    saveCard(state)
+    const newCards = cards.map(card => (card.id === state.id ? state : card))
+    setCards(newCards)
     onFinish()
   }
 

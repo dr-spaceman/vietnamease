@@ -4,9 +4,9 @@ import { Button, Icon } from 'matterial'
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 
-import type { Data, Translation } from './types'
+import type { Data } from './types'
 import classes from './d.module.css'
-import { addCard } from '@/db'
+import { addCard } from '@/db/cards'
 import delay from '@/utils/delay'
 
 type State = { loading?: boolean; complete?: boolean; error?: string }
@@ -23,7 +23,7 @@ function SearchResults({ data }: { data: Data }): JSX.Element {
 
     try {
       setState({ loading: true })
-      addCard(translation)
+      addCard({ lang: translation })
       await delay(500) // simulate busy state
       setState({ complete: true })
       await delay(500)

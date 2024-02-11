@@ -14,7 +14,15 @@ declare global {
 
     /** Meanings and translations */
     lang: Translation
+
+    /** When the user added the card */
+    added: IsoDate
+
+    /** When the user last registered an action */
+    lastSeen?: IsoDate
   }
+
+  type IsoDate = string
 
   type Languages = keyof typeof LANGUAGE_MAP
 
@@ -40,6 +48,7 @@ declare global {
     langLearn: LanguageKit
     showLang?: Language
     hideProgress?: boolean
+    includeMastered?: 'occasionally' | 'always' | 'never'
   }
 
   interface Level {

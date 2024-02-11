@@ -16,3 +16,10 @@ export const LEVELS: Level[] = [
   { description: 'weak', level: -3, color: 'error' },
   { description: 'critical', level: -20, color: 'error' },
 ]
+
+export const PREFERENCES_DEFAULT: Preferences = {
+  langNative: { lang: 'en' },
+  langLearn: { lang: 'vi' },
+  includeMastered: 'occasionally',
+  showLang: LANGUAGES[0],
+}

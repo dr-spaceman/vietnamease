@@ -14,7 +14,7 @@ import React from 'react'
 import { useFormState } from 'react-dom'
 
 import type { StartPreferences } from './flash-cards'
-import { FLUENCY } from '@/const'
+import { FLUENCY, PREFERENCES_DEFAULT } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
 import { addCards } from '@/db/cards'
@@ -33,7 +33,7 @@ const initialFormVals: StartPreferences = {
 function FlashCardsStart({
   setPreferences,
 }: {
-  setPreferences: (prefs: Partial<Preferences>) => void
+  setPreferences: (prefs: Preferences) => void
 }) {
   const [state, formAction] = useFormState(buildCards, null)
   const { form, handleChange } = useForm<StartPreferences>(initialFormVals)
@@ -43,7 +43,7 @@ function FlashCardsStart({
   React.useEffect(() => {
     if (state?.success) {
       if (state?.translations?.length) {
-        const cards = addCards(state.translations)
+        const cards = addCards(state.translations.map(lang => ({ lang })))
         setCards(cards)
       } else {
         throw new Error('No cards were found on the server')
@@ -61,6 +61,7 @@ function FlashCardsStart({
     }
 
     const prefs: Preferences = {
+      ...PREFERENCES_DEFAULT,
       langNative: langKit,
       langLearn: { lang: 'vi', dialect: form.data.dialect },
     }

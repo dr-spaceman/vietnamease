@@ -5,22 +5,30 @@ import {
   CheckButton,
   CheckButtonGroup,
   Container,
-  MenuProvider,
+  Icon,
   Menu,
   MenuButton,
   MenuItem,
-  Icon,
+  MenuItemCheckbox,
+  MenuProvider,
 } from 'matterial'
 import React from 'react'
 
-import { FLUENCY, LANGUAGES, LANGUAGE_MAP, LEVELS } from '@/const'
+import {
+  FLUENCY,
+  LANGUAGES,
+  LANGUAGE_MAP,
+  LEVELS,
+  PREFERENCES_DEFAULT,
+} from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
 import classes from './flash-cards.module.css'
 import { findTranslationSet } from '@/db/translations'
-import { addCards, getCards, sortCards } from '@/db/cards'
+import { addCards, deleteCard, getCards, saveCard, sortCards } from '@/db/cards'
 import CardsContext from '@/contexts/cards-context'
+import useCards from '@/utils/use-cards'
 
 export type StartPreferences = {
   dialect: 'Northern' | 'Central' | 'Southern'
@@ -32,10 +40,10 @@ const masteredLevel =
   LEVELS.find(level => level.description === 'mastered')?.level || 20
 
 function FlashCards(): JSX.Element {
-  const [cards, setCards] = useLocalStorage<Card[]>('cards', [])
-  const [preferences, setPreferences] = useLocalStorage<Partial<Preferences>>(
+  const [cards, setCards] = useCards()
+  const [preferences, setPreferences] = useLocalStorage<Preferences>(
     'flashcards-preferences',
-    { showLang: LANGUAGES[0] }
+    PREFERENCES_DEFAULT
   )
   const [cardIndex, setCardIndex] = React.useState(0)
   const [showCustomStart, setShowCustomStart] = React.useState(false)
@@ -76,7 +84,7 @@ function FlashCards(): JSX.Element {
       'fluency:beginner',
     ])
     if (foundSet) {
-      const cards = addCards(foundSet)
+      const cards = addCards(foundSet.map(lang => ({ lang })))
       setCards(cards)
     } else {
       throw new Error('Error building from data preset')
@@ -88,30 +96,34 @@ function FlashCards(): JSX.Element {
    */
   const register: Register = action => {
     console.log('register', action)
-    if (action === 'increment') {
-      cards[cardIndex].level++
-      if (cards[cardIndex].level === masteredLevel) {
-        numMastered.current++
-      }
-      setCards(cards)
-    } else if (action === 'decrement') {
-      cards[cardIndex].level--
-      setCards(cards)
-    } else if (action === 'delete') {
+    if (action === 'delete') {
+      deleteCard(cards[cardIndex])
       const cardsDeleted = cards.filter((_, index) => index !== cardIndex)
       console.log('delete', cardIndex, cardsDeleted)
       setCards(cardsDeleted)
 
       return
     }
+    if (action === 'increment') {
+      cards[cardIndex].level++
+      if (cards[cardIndex].level === masteredLevel) {
+        numMastered.current++
+      }
+    } else if (action === 'decrement') {
+      cards[cardIndex].level--
+    }
+    cards[cardIndex].lastSeen = new Date().toISOString()
+    saveCard(cards[cardIndex])
+    setCards(cards)
     setCardIndex(cardIndex + 1)
   }
 
   const resetCards = () => {
     setCards([])
-    setPreferences({})
+    setPreferences(PREFERENCES_DEFAULT)
     setCardIndex(0)
     numMastered.current = 0
+    window.localStorage.clear()
   }
 
   const newSession = () => {
@@ -218,26 +230,40 @@ function FlashCards(): JSX.Element {
             <Icon icon="Settings" />
           </MenuButton>
           <Menu>
-            <MenuItem
+            <MenuItemCheckbox
+              name=""
               hideOnClick={false}
+              checked={preferences.hideProgress}
               onClick={() => {
                 setPreferences({
                   ...preferences,
                   hideProgress: !preferences.hideProgress,
                 })
               }}
-              style={{
-                display: 'flex',
-                flexFlow: 'row nowrap',
-                gap: '0.25em',
-                alignItems: 'center',
-              }}
             >
-              <Icon
-                icon={preferences.hideProgress ? 'checkboxChecked' : 'checkbox'}
-                size={25}
-              />{' '}
               Hide session progress
+            </MenuItemCheckbox>
+            <MenuItem
+              hideOnClick={false}
+              style={{ display: 'flex', gap: '0.5em' }}
+            >
+              Include mastered cards
+              {(['occasionally', 'always', 'never'] as const).map(freq => (
+                <a
+                  key={freq}
+                  style={{
+                    textDecoration:
+                      preferences.includeMastered === freq
+                        ? 'underline'
+                        : 'none',
+                  }}
+                  onClick={() =>
+                    setPreferences({ ...preferences, includeMastered: freq })
+                  }
+                >
+                  {freq}
+                </a>
+              ))}
             </MenuItem>
             <MenuItem onClick={resetCards}>Reset (debug)</MenuItem>
           </Menu>

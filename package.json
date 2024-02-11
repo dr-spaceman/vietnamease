@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "matterial": "^3.3.1",
+    "matterial": "^3.3.4",
     "next": "^14.0.4",
     "openai": "^4.24.2",
     "react": "^18",
