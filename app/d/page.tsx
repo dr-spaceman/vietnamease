@@ -2,7 +2,7 @@ import OpenAI from 'openai'
 import { Metadata, ResolvingMetadata } from 'next'
 import * as React from 'react'
 
-import type { Data, Translation } from './types'
+import type { Data } from './types'
 import { LANGUAGES } from '@/const'
 import getEnv from '@/utils/get-env'
 import cache from '@/utils/cache'
@@ -100,7 +100,7 @@ async function getData(searchTerm: string): Promise<Data> {
   // }
 
   const params: OpenAI.Chat.ChatCompletionCreateParams = {
-    model: 'gpt-4',
+    model: 'gpt-3.5-turbo',
     messages: [
       {
         role: 'system',

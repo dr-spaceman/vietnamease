@@ -78,11 +78,11 @@ async function buildCards(
       systemContent = `You help ${LANGUAGE_MAP[LANGUAGES[0]]} speakers learn ${
         LANGUAGE_MAP[LANGUAGES[1]]
       }.`
-      userContent = `Suggest 10 vocabulary words or short phrases that would be useful for an ${params.fluency} learner to know. These should be common, conversational words only. Format into  a dataset in format: \`${LANGUAGES[0]}|${LANGUAGES[1]}\` one per line`
+      userContent = `Suggest 10 vocabulary words or short phrases that would be useful for an ${params.fluency} learner to know. These should be common, conversational words only. Format into a dataset in format: \`${LANGUAGES[0]}|${LANGUAGES[1]}\` one per line`
     }
 
     const chatParams: OpenAI.Chat.ChatCompletionCreateParams = {
-      model: 'gpt-4',
+      model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'system',
