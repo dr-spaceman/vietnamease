@@ -22,13 +22,7 @@ import { buildCards } from './actions'
 import { SubmitButton } from '@/components/submit-button'
 import CardsContext from '@/contexts/cards-context'
 
-const dialects = ['Northern', 'Central', 'Southern']
-
-const initialFormVals: StartPreferences = {
-  dialect: 'Northern',
-  fluency: 'beginner',
-  vocabList: '',
-}
+const DIALECTS = ['Northern', 'Central', 'Southern']
 
 function FlashCardsStart({
   setPreferences,
@@ -36,9 +30,9 @@ function FlashCardsStart({
   setPreferences: (prefs: Preferences) => void
 }) {
   const [state, formAction] = useFormState(buildCards, null)
-  const { form, handleChange } = useForm<StartPreferences>(initialFormVals)
   const langKit = useLang()
   const [_, setCards] = React.useContext(CardsContext)
+  const [fluencyValue, setFluencyValue] = React.useState('beginner')
 
   React.useEffect(() => {
     if (state?.success) {
@@ -51,19 +45,23 @@ function FlashCardsStart({
     }
   }, [state, setCards])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
     if (!langKit) {
       throw new Error('No language set')
     }
 
-    if (form.data.fluency === 'custom' && form.data.vocabList?.trim() === '') {
+    const form = e.target as HTMLFormElement
+    const formData = new FormData(form)
+    const data = Object.fromEntries(formData.entries()) as StartPreferences
+
+    if (data.fluency === 'custom' && data.vocabList?.trim() === '') {
       e.preventDefault()
     }
 
     const prefs: Preferences = {
       ...PREFERENCES_DEFAULT,
       langNative: langKit,
-      langLearn: { lang: 'vi', dialect: form.data.dialect },
+      langLearn: { lang: 'vi', dialect: data.dialect },
     }
     setPreferences(prefs)
   }
@@ -78,42 +76,41 @@ function FlashCardsStart({
           {FLUENCY.map(fluency => (
             <CheckButton
               key={fluency}
+              type="radio"
               name="fluency"
               value={fluency}
-              checked={form.data.fluency === fluency}
-              onChange={() => handleChange('fluency', fluency)}
+              defaultChecked={fluency === 'beginner'}
+              onChange={() => setFluencyValue(fluency)}
             >
               {capitalize(fluency)}
             </CheckButton>
           ))}
           <CheckButton
+            type="radio"
             name="fluency"
             value="custom"
-            checked={form.data.fluency === 'custom'}
-            onChange={() => handleChange('fluency', 'custom')}
+            onChange={() => setFluencyValue('custom')}
           >
             Custom List
           </CheckButton>
         </CheckButtonGroup>
       </Container>
-      {form.data.fluency === 'custom' && (
+      {fluencyValue === 'custom' && (
         <TextInput
           name="vocabList"
-          value={form.data.vocabList}
           placeholder="List of vocabulary words or phrases"
           multiline={true}
           rows={3}
-          onChange={handleChange}
         />
       )}
       <Container row>
-        {dialects.map(dialect => (
+        {DIALECTS.map(dialect => (
           <CheckButton
             key={dialect}
+            type="radio"
             name="dialect"
             value={dialect}
-            checked={form.data.dialect === dialect}
-            onChange={() => handleChange('dialect', dialect)}
+            defaultChecked={dialect === DIALECTS[0]}
           >
             {dialect} dialect
           </CheckButton>
