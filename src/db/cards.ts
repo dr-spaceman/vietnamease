@@ -10,6 +10,11 @@ type PartialCard = Partial<Card> & { lang: Card['lang'] }
 
 const MAX_MASTERED = 5 // Maximum number of mastered cards if user requests 'occasional'
 
+/**
+ * Add a card to storage, and put it at the front of the session stack
+ *
+ * @returns {Card} new card generated from input `props`
+ */
 function addCard(props: PartialCard): Card {
   const newCard: Card = {
     id: uuid(),
