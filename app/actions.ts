@@ -10,6 +10,7 @@ import {
 } from '@/db/translations'
 import delay from '@/utils/delay'
 import getEnv from '@/utils/get-env'
+import extractJson from '@/utils/extract-json'
 
 type ResponseSuccess = {
   success: true
@@ -20,22 +21,22 @@ export type Response = ResponseSuccess | ResponseFail | null
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
-function parseTranslation(content: string) {
-  const lines = content.split('\n')
-  const translationArray: Translation[] = []
+// function parseTranslation(content: string) {
+//   const lines = content.split('\n')
+//   const translationArray: Translation[] = []
 
-  lines.forEach(line => {
-    const langs = line.split('|')
-    if (langs[0] && langs[1]) {
-      translationArray.push({
-        [LANGUAGES[0]]: langs[0].trim(),
-        [LANGUAGES[1]]: langs[1].trim(),
-      })
-    }
-  })
+//   lines.forEach(line => {
+//     const langs = line.split('|')
+//     if (langs[0] && langs[1]) {
+//       translationArray.push({
+//         [LANGUAGES[0]]: langs[0].trim(),
+//         [LANGUAGES[1]]: langs[1].trim(),
+//       })
+//     }
+//   })
 
-  return translationArray
-}
+//   return translationArray
+// }
 
 async function buildCards(
   prevState: Response,
@@ -71,18 +72,33 @@ async function buildCards(
       if (!params.vocabList) {
         throw new Error('User-input vocab list needed')
       }
-      systemContent =
-        'You are a viet-eng translator. Given a list of words, build a dataset in format: `en|vi` one per line'
+      systemContent = `You are a translator of ${
+        LANGUAGE_MAP[LANGUAGES[0]]
+      } and ${
+        LANGUAGE_MAP[LANGUAGES[1]]
+      }. Given a list of words, translate and return JSON format list: [{${
+        LANGUAGES[0]
+      },${LANGUAGES[1]}}], no spaces or newlines`
       userContent = params.vocabList
     } else {
       systemContent = `You help ${LANGUAGE_MAP[LANGUAGES[0]]} speakers learn ${
         LANGUAGE_MAP[LANGUAGES[1]]
-      }.`
-      userContent = `Suggest 10 vocabulary words or short phrases that would be useful for an ${params.fluency} learner to know. These should be common, conversational words only. Format into a dataset in format: \`${LANGUAGES[0]}|${LANGUAGES[1]}\` one per line`
+      }. Suggest some useful common/conversational vocabulary words (NO phrases) to learn. Format into a JSON array: [{${
+        LANGUAGES[0]
+      },${
+        LANGUAGES[1]
+      }}]. Remove spaces and newlines from the output. Come up with a list of 200 useful words and phrases, and sort the list by fluency level, with beginner words first and advanced words later.`
+      let startIndex = 0
+      if (params.fluency === 'intermediate') {
+        startIndex = 95
+      } else if (params.fluency === 'advanced') {
+        startIndex = 190
+      }
+      userContent = `Give me 10 words starting from #${startIndex} on the list`
     }
 
     const chatParams: OpenAI.Chat.ChatCompletionCreateParams = {
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo-0125',
       messages: [
         {
           role: 'system',
@@ -99,6 +115,7 @@ async function buildCards(
     }
     const chatCompletion: OpenAI.Chat.ChatCompletion =
       await openai.chat.completions.create(chatParams)
+    console.log(systemContent, userContent)
     console.log('chat completion usage', chatCompletion.usage)
     if (chatCompletion.choices?.length === 0) {
       throw new Error('No results')
@@ -110,7 +127,7 @@ async function buildCards(
     if (!content) {
       throw new Error('No chat content')
     }
-    const parsedContent: Translation[] = parseTranslation(content)
+    const parsedContent: Translation[] = extractJson(content)
     console.log('parsed content', parsedContent)
     if (
       !parsedContent ||
