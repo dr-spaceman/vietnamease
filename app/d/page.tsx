@@ -4,12 +4,10 @@ import * as React from 'react'
 
 import type { Data } from './types'
 import { LANGUAGES } from '@/const'
-import getEnv from '@/utils/get-env'
 import cache from '@/utils/cache'
 import extractJson from '@/utils/extract-json'
 import SearchResults from './search-results'
-
-const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
+import openai from './open-ai'
 
 type Props = { searchParams: { [key: string]: string | string[] | undefined } }
 // type WikiRecord = { [key: string]: any }
@@ -100,29 +98,52 @@ async function getData(searchTerm: string): Promise<Data> {
   // }
 
   const params: OpenAI.Chat.ChatCompletionCreateParams = {
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-3.5-turbo-0613',
     messages: [
       {
         role: 'system',
         content:
           // 'When given a Vietnamese or English word or phrase, translate it. You may find multiple translations. For each translation include a JSON object: {en, vi}. Add all the translations to a JSON list and output the list.',
+          // 'When given a Vietnamese or English word or phrase, translate it',
           'When given a Vietnamese or English word or phrase, translate it and return a JSON object: {en, vi}',
       },
       {
         role: 'user',
-        content: searchTerm,
+        content: `${searchTerm}`,
       },
     ],
+    // functions: [
+    //   {
+    //     name: 'translate',
+    //     parameters: {
+    //       type: 'object',
+    //       properties: {
+    //         en: {
+    //           type: 'string',
+    //           description: 'English word',
+    //         },
+    //         vi: {
+    //           type: 'string',
+    //           description: 'Vietnamese word',
+    //         },
+    //       },
+    //       required: ['en', 'vi'],
+    //     },
+    //     description: 'translate Vietnamese and English words',
+    //   },
+    // ],
     temperature: 0.7,
     max_tokens: 64,
     top_p: 1,
   }
   const chatCompletion: OpenAI.Chat.ChatCompletion =
     await openai.chat.completions.create(params)
+  console.log(chatCompletion)
   console.log('chat completion usage', chatCompletion.usage)
   if (chatCompletion.choices?.length) {
-    chatCompletion.choices.forEach(({ message: { content } }) => {
-      console.log('chat content:', content)
+    chatCompletion.choices.forEach(({ message }) => {
+      const { content } = message
+      console.log('chat content:', message, content)
       if (content) {
         const parsedContent: Translation = extractJson(content)
         console.log('parsed content', parsedContent)
