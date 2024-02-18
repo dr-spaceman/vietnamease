@@ -70,7 +70,7 @@ async function getData(searchTerm: string): Promise<Data> {
     return JSON.parse(cached)
   }
 
-  let results: Data = []
+  let results: Translation[] = []
 
   // const lang = 'en'
   // const res = await fetch(
