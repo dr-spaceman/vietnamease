@@ -1,14 +1,16 @@
-import { Html, Body, Button, Icon, TextInput, Link } from 'matterial'
+import { Html, Body, Button, Icon, TextInput, Link, Alert } from 'matterial'
 import NextLink from 'next/link'
 import { Inter } from 'next/font/google'
+import { cookies } from 'next/headers'
+
+import { Session, decryptSession } from '@/lib/login'
+import generatePageData from '@/utils/generate-page-data'
+import './globals.css'
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 })
-
-import generatePageData from '@/utils/generate-page-data'
-import './globals.css'
 
 const config = {
   appTitle: 'Vietnamease App',
@@ -17,11 +19,20 @@ const config = {
 
 export const { metadata, viewport } = generatePageData()
 
+function getSessionData(): Session | null {
+  const encryptedSessionData = cookies().get('session')?.value
+
+  return encryptedSessionData ? decryptSession(encryptedSessionData) : null
+}
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = getSessionData()
+  console.log('session', session)
+
   return (
     <Html config={config} className={inter.className}>
       <Body>
@@ -42,6 +53,9 @@ export default function RootLayout({
             </div>
           </form>
         </header>
+        {cookies().has('loginError') && (
+          <Alert severity="error">{cookies().get('loginError')?.value}</Alert>
+        )}
         {children}
       </Body>
     </Html>
