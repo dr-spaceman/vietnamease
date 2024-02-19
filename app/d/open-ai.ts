@@ -51,6 +51,4 @@ const getOpenAi = () => {
   // });
 }
 
-const openAi = getOpenAi()
-
-export default openAi
+export { getOpenAi }

@@ -7,7 +7,7 @@ import { LANGUAGES } from '@/const'
 import cache from '@/utils/cache'
 import extractJson from '@/utils/extract-json'
 import SearchResults from './search-results'
-import openai from './open-ai'
+import { getOpenAi } from './open-ai'
 
 type Props = { searchParams: { [key: string]: string | string[] | undefined } }
 // type WikiRecord = { [key: string]: any }
@@ -136,6 +136,7 @@ async function getData(searchTerm: string): Promise<Data> {
     max_tokens: 64,
     top_p: 1,
   }
+  const openai = getOpenAi()
   const chatCompletion: OpenAI.Chat.ChatCompletion =
     await openai.chat.completions.create(params)
   console.log(chatCompletion)
