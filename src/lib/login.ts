@@ -4,8 +4,6 @@ type LoginSuccess = { success: true }
 type LoginFail = { success: false; error: string }
 type LoginResponse = LoginSuccess | LoginFail
 
-type Session = { sessionId: symbol | string }
-
 function encryptSession(data: Session): string {
   return JSON.stringify(data)
 }

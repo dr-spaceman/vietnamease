@@ -60,6 +60,8 @@ declare global {
   /** User actions on a card */
   type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
 
+  type Session = { sessionId: string }
+
   /** @example { en: 'beautiful', vi: 'đẹp' } */
   type Translation = { [K in Language]: string }
 }

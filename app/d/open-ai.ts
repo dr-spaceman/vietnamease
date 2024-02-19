@@ -49,6 +49,6 @@ const getOpenAi = (sessionId: string) => {
 const session: Session | null = cookies().has('session')
   ? JSON.parse(cookies().get('session')?.value as string)
   : null
-const openAi = getOpenAi(session.sessionId || 'no-session')
+const openAi = getOpenAi(session?.sessionId || 'no-session')
 
 export default openAi

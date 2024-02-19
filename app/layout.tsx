@@ -3,7 +3,7 @@ import NextLink from 'next/link'
 import { Inter } from 'next/font/google'
 import { cookies } from 'next/headers'
 
-import { Session, decryptSession } from '@/lib/login'
+import { decryptSession } from '@/lib/login'
 import generatePageData from '@/utils/generate-page-data'
 import './globals.css'
 
