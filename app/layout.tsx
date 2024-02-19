@@ -31,7 +31,6 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const session = getSessionData()
-  console.log('session', session)
 
   return (
     <Html config={config} className={inter.className}>

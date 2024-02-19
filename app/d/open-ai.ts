@@ -1,15 +1,17 @@
-import getEnv from '@/utils/get-env'
+import { cookies } from 'next/headers'
 import OpenAI from 'openai'
+import getEnv from '@/utils/get-env'
 
-let instance: any
+let instances: any = {}
 
-const getOpenAi = () => {
-  if (!instance) {
-    console.log('creating new instance of openai')
-    instance = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
+const getOpenAi = (sessionId: string) => {
+  if (!(sessionId in instances)) {
+    console.log('creating new instance of openai', sessionId)
+    instances[sessionId] = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
+    console.log('openai instances', Object.keys(instances))
   }
 
-  return instance
+  return instances[sessionId]
   // const assistant = await openai.beta.assistants.create({
   //   instructions: "You are a weather bot. Use the provided functions to answer questions.",
   //   model: "gpt-4-turbo-preview",
@@ -44,6 +46,9 @@ const getOpenAi = () => {
   // });
 }
 
-const openAi = getOpenAi()
+const session: Session | null = cookies().has('session')
+  ? JSON.parse(cookies().get('session')?.value as string)
+  : null
+const openAi = getOpenAi(session.sessionId || 'no-session')
 
 export default openAi
