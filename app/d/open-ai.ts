@@ -4,7 +4,12 @@ import getEnv from '@/utils/get-env'
 
 let instances: any = {}
 
-const getOpenAi = (sessionId: string) => {
+const getOpenAi = () => {
+  const session: Session | null = cookies().has('session')
+    ? JSON.parse(cookies().get('session')?.value as string)
+    : null
+  const sessionId = session?.sessionId || 'no-session'
+
   if (!(sessionId in instances)) {
     console.log('creating new instance of openai', sessionId)
     instances[sessionId] = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
@@ -46,9 +51,6 @@ const getOpenAi = (sessionId: string) => {
   // });
 }
 
-const session: Session | null = cookies().has('session')
-  ? JSON.parse(cookies().get('session')?.value as string)
-  : null
-const openAi = getOpenAi(session?.sessionId || 'no-session')
+const openAi = getOpenAi()
 
 export default openAi
