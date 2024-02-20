@@ -23,6 +23,11 @@
   cursor: pointer;
 }
 
+.flashCard big {
+  font-size: x-large;
+  letter-spacing: -0.02em;
+}
+
 .level {
   position: absolute;
   right: var(--flash-card-space);

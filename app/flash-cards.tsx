@@ -6,6 +6,7 @@ import {
   CheckButtonGroup,
   Container,
   Icon,
+  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -29,6 +30,7 @@ import { findTranslationSet } from '@/db/translations'
 import { addCards, deleteCard, getCards, saveCard, sortCards } from '@/db/cards'
 import CardsContext from '@/contexts/cards-context'
 import useCards from '@/utils/use-cards'
+import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
 
 export type StartPreferences = {
   dialect: 'Northern' | 'Central' | 'Southern'
@@ -48,16 +50,6 @@ function FlashCards(): JSX.Element {
   const [cardIndex, setCardIndex] = React.useState(0)
   const [showCustomStart, setShowCustomStart] = React.useState(false)
   let numMastered = React.useRef(0)
-
-  // React.useEffect(() => {
-  //   // Don't set preferences until a card set has been created
-  //   if (cards.length === 0) {
-  //     return
-  //   }
-
-  //   setPreferences({ ...preferences, ...{ langNative: langKit } })
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [langKit])
 
   const Progress = React.useCallback(() => {
     if (preferences.hideProgress) {
@@ -95,7 +87,6 @@ function FlashCards(): JSX.Element {
    * Register user activity on current card
    */
   const register: Register = action => {
-    console.log('register', action)
     if (action === 'delete') {
       deleteCard(cards[cardIndex])
       const cardsDeleted = cards.filter((_, index) => index !== cardIndex)
@@ -225,7 +216,7 @@ function FlashCards(): JSX.Element {
             {LANGUAGE_MAP[LANGUAGES[1]]}
           </CheckButton>
         </CheckButtonGroup>
-        <MenuProvider>
+        <MenuProvider setOpen={open => setKeyboardInputActive(!open)}>
           <MenuButton shape="circle">
             <Icon icon="Settings" />
           </MenuButton>

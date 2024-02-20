@@ -1,4 +1,9 @@
-import { Session, generateSessionId, isValidSession, login } from '@/lib/login'
+import {
+  Session,
+  generateSessionId,
+  isValidSession,
+  login,
+} from '@/lib/session'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
