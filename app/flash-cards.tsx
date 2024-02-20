@@ -256,6 +256,13 @@ function FlashCards(): JSX.Element {
                 </a>
               ))}
             </MenuItem>
+            <MenuItem
+              render={
+                <Link href="/add-card" unstyled>
+                  Add a Card
+                </Link>
+              }
+            />
             <MenuItem onClick={resetCards}>Reset (debug)</MenuItem>
           </Menu>
         </MenuProvider>

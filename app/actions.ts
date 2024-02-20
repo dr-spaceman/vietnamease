@@ -68,26 +68,46 @@ async function buildCards(
     let systemContent = ''
     let userContent = ''
 
+    const translateFunction = {
+      name: 'translate',
+      parameters: {
+        type: 'object',
+        properties: {
+          t: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                en: {
+                  type: 'string',
+                  description: 'English word',
+                },
+                vi: {
+                  type: 'string',
+                  description: 'Vietnamese word',
+                },
+              },
+              required: ['en', 'vi'],
+            },
+          },
+        },
+        required: ['t'],
+      },
+      description: 'translate Vietnamese and English words',
+    }
+
     if (params.fluency === 'custom') {
       if (!params.vocabList) {
         throw new Error('User-input vocab list needed')
       }
       systemContent = `You are a translator of ${
         LANGUAGE_MAP[LANGUAGES[0]]
-      } and ${
-        LANGUAGE_MAP[LANGUAGES[1]]
-      }. Given a list of words, translate and return JSON format list: [{${
-        LANGUAGES[0]
-      },${LANGUAGES[1]}}], no spaces or newlines`
+      } and ${LANGUAGE_MAP[LANGUAGES[1]]}.`
       userContent = params.vocabList
     } else {
       systemContent = `You help ${LANGUAGE_MAP[LANGUAGES[0]]} speakers learn ${
         LANGUAGE_MAP[LANGUAGES[1]]
-      }. Suggest some useful common/conversational vocabulary words (NO phrases) to learn. Format into a JSON array: [{${
-        LANGUAGES[0]
-      },${
-        LANGUAGES[1]
-      }}]. Remove spaces and newlines from the output. Come up with a list of 200 useful words and phrases, and sort the list by fluency level, with beginner words first and advanced words later.`
+      }. Suggest some useful common/conversational vocabulary words (NO phrases) to learn. Come up with a list of 200 useful words and phrases, and sort the list by fluency level, with beginner words first and advanced words later.`
       let startIndex = 0
       if (params.fluency === 'intermediate') {
         startIndex = 95
@@ -109,38 +129,41 @@ async function buildCards(
           content: userContent,
         },
       ],
-      temperature: 0.7,
+      functions: [translateFunction],
+      function_call: { name: 'translate' },
+      temperature: 0.2,
       max_tokens: 128 + 64,
-      top_p: 1,
+      // top_p: 1,
     }
     const chatCompletion: OpenAI.Chat.ChatCompletion =
       await openai.chat.completions.create(chatParams)
     console.log(systemContent, userContent)
     console.log('chat completion usage', chatCompletion.usage)
-    if (chatCompletion.choices?.length === 0) {
-      throw new Error('No results')
+
+    const responseMessage = chatCompletion.choices[0].message
+    console.log('response message', responseMessage)
+
+    if (responseMessage.function_call?.name !== 'translate') {
+      throw new Error('Function call not found')
     }
-    const {
-      message: { content },
-    } = chatCompletion.choices[0]
-    console.log('chat content:', content)
-    if (!content) {
-      throw new Error('No chat content')
-    }
-    const parsedContent: Translation[] = extractJson(content)
+
+    const parsedContent: { t: Translation[] } = extractJson(
+      responseMessage.function_call.arguments
+    )
     console.log('parsed content', parsedContent)
+    const { t: translations } = parsedContent
     if (
-      !parsedContent ||
-      !(LANGUAGES[0] in parsedContent[0]) ||
-      !(LANGUAGES[1] in parsedContent[0]) ||
-      !Array.isArray(parsedContent)
+      !translations ||
+      !(LANGUAGES[0] in translations[0]) ||
+      !(LANGUAGES[1] in translations[0]) ||
+      !Array.isArray(translations)
     ) {
       throw new Error(
         `The translation service couldn't find any results, or there were errors serializing the results into usable data.`
       )
     }
 
-    return { success: true, translations: parsedContent }
+    return { success: true, translations }
   } catch (error: unknown) {
     return { success: false, error: String(error) }
   }
