@@ -1,4 +1,5 @@
 import type { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 type LoginSuccess = { success: true }
 type LoginFail = { success: false; error: string }
@@ -55,11 +56,20 @@ function isValidSession(session?: string | null | undefined) {
   }
 }
 
+function getSession(): Session | null {
+  const session = cookies().has('session')
+    ? (JSON.parse(cookies().get('session')?.value as string) as Session)
+    : null
+
+  return session
+}
+
 export type { Session, LoginResponse }
 export {
-  login,
-  isValidSession,
-  generateSessionId,
-  encryptSession,
   decryptSession,
+  encryptSession,
+  generateSessionId,
+  getSession,
+  isValidSession,
+  login,
 }
