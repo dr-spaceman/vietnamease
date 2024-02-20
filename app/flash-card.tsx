@@ -13,6 +13,10 @@ import * as React from 'react'
 import { LEVELS } from '@/const'
 import classes from './flash-cards.module.css'
 import FlashCardEdit from './flash-card-edit'
+import {
+  isKeyboardInputActive,
+  setKeyboardInputActive,
+} from '@/utils/keyboard-input-active'
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -49,7 +53,7 @@ function FlashCard({
 
   React.useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (edit) {
+      if (edit || !isKeyboardInputActive()) {
         return
       }
       if (event.key === ' ') {
@@ -101,7 +105,7 @@ function FlashCard({
           {thisLevel.description}
         </small>
         {progress}
-        <MenuProvider>
+        <MenuProvider setOpen={open => setKeyboardInputActive(!open)}>
           <MenuButton
             shape="circle"
             className={classes.menuButton}

@@ -1,10 +1,11 @@
-import { Html, Body, Button, Icon, TextInput, Link, Alert } from 'matterial'
+import { Html, Body, Alert } from 'matterial'
 import NextLink from 'next/link'
 import { Inter } from 'next/font/google'
 import { cookies } from 'next/headers'
 
-import { decryptSession } from '@/lib/login'
+import { decryptSession } from '@/lib/session'
 import generatePageData from '@/utils/generate-page-data'
+import Header from './header'
 import './globals.css'
 
 const inter = Inter({
@@ -31,27 +32,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   const session = getSessionData()
+  console.log('session@RootLayout', session)
 
   return (
     <Html config={config} className={inter.className}>
       <Body>
-        <header className="page-header">
-          <h1>
-            <Link href="/">Vietnamease</Link>
-          </h1>
-          <form action="d" method="get">
-            <div className="page-header__search">
-              <TextInput
-                name="q"
-                placeholder="'hello' or 'xin chao'"
-                maxLength={45}
-              />
-              <Button shape="circle" color="primary" type="submit">
-                <Icon icon="Search" />
-              </Button>
-            </div>
-          </form>
-        </header>
+        <Header />
         {cookies().has('loginError') && (
           <Alert severity="error">{cookies().get('loginError')?.value}</Alert>
         )}
