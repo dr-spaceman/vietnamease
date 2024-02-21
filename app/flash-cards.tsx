@@ -169,8 +169,8 @@ function FlashCards(): JSX.Element {
           <i>
             <b>Chào bạn!</b>
           </i>{' '}
-          This app uses the power of AI and computer algorithms to help you
-          translate and learn Vietnamese. <i>Chúc may mắn!</i>
+          Vietnamease app is your AI copilot in your Vietnamese language
+          learning journey 🧑‍✈️🚀 <i>Chúc may mắn!</i>
         </p>
         <Container row>
           <Button variant="contained" color="secondary" onClick={quickStart}>

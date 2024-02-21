@@ -2,7 +2,7 @@ Your Vietnamese language copilot
 
 - **A progressive web app**: Optimized for responsive experience on desktops and mobile devices, with offline capabilities.
 - **AI powered**: OpenAI APIs are leveraged to help you maintain your progress and advance fluency.
-- **Personalized learning**: The app will adapt to your learning style and pace, and will provide you with the most relevant content to help you learn faster. Compare this with curated, linear learning paths that every user follows without regard to their individual needs.
+- **Personalized learning resources**: The app will adapt to your learning style and pace, and will provide you with the most relevant content to help you achieve your own goals. Compare this to other apps with curated, linear learning paths that every user follows.
 - **Proven traditional educational strategies**: Pimsleur method, spaced repetition, flash cards, and more.
 
 # TODO

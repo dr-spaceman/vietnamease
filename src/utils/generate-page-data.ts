@@ -8,8 +8,11 @@ export default function generatePageData({
 }: PageData = {}): PageData {
   const metadataWithDefaults = {
     ...metadata,
-    title: metadata?.title ?? 'Vietnamease App',
-    description: metadata?.description ?? 'An app to help you learn Vietnamese',
+    title:
+      metadata?.title ?? 'Vietnamease App - Your copilot to learn Vietnamese',
+    description:
+      metadata?.description ??
+      'Learn Vietnamese with an AI copilot. Translate words, phrases, and sentences between English and Vietnamese. Practice with flashcards and quizzes. Get help with grammar and pronunciation. Chat with a fluent computer language partner. Get bespoke language learning resources based on your own personal interests and goals. All powered by AI.',
   }
   const viewportWithDefaults = {
     ...viewport,
