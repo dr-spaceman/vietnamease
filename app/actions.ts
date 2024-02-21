@@ -3,7 +3,7 @@
 import OpenAI from 'openai'
 
 import type { StartPreferences } from './flash-cards'
-import { LANGUAGES, LANGUAGE_MAP } from '@/const'
+import { LANGUAGES, LANGUAGE_MAP, MAX_LEN_CUSTOM_LIST } from '@/const'
 import {
   findTranslationSet,
   type TranslationSearchParams,
@@ -99,6 +99,11 @@ async function buildCards(
     if (params.fluency === 'custom') {
       if (!params.vocabList) {
         throw new Error('User-input vocab list needed')
+      }
+      if (params.vocabList.length > MAX_LEN_CUSTOM_LIST) {
+        throw new Error(
+          `Vocab list too long, max length is ${MAX_LEN_CUSTOM_LIST}`
+        )
       }
       systemContent = `You are a translator of ${
         LANGUAGE_MAP[LANGUAGES[0]]

@@ -3,6 +3,7 @@
 import OpenAI from 'openai'
 import getEnv from '@/utils/get-env'
 import { getSession } from '@/lib/session'
+import { MAX_LEN_TRANSLATION } from '@/const'
 
 let instances: Record<Session['sessionId'], OpenAI> = {}
 // TODO: store threadIds in a database
@@ -71,11 +72,17 @@ async function createChat() {
   }
   console.log('thread', thread)
 
-  const message = async (message: string) =>
+  const message = async (message: string) => {
+    if (message.length > MAX_LEN_TRANSLATION) {
+      throw new Error(
+        `Message too long: ${message.length} > ${MAX_LEN_TRANSLATION}`
+      )
+    }
     await openai.beta.threads.messages.create(thread.id, {
       role: 'user',
       content: message,
     })
+  }
 
   const run = async () => {
     let run = await openai.beta.threads.runs.create(thread.id, {

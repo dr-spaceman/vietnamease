@@ -2,6 +2,7 @@
 
 import { Button, Icon, Link, TextInput } from 'matterial'
 import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
+import { MAX_LEN_TRANSLATION } from '@/const'
 
 function Header() {
   return (
@@ -14,7 +15,8 @@ function Header() {
           <TextInput
             name="q"
             placeholder="'hello' or 'xin chao'"
-            maxLength={45}
+            maxLength={MAX_LEN_TRANSLATION}
+            width="8.7em"
             onFocus={() => setKeyboardInputActive(false)}
             onBlur={() => setKeyboardInputActive(true)}
           />

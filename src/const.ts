@@ -23,3 +23,6 @@ export const PREFERENCES_DEFAULT: Preferences = {
   includeMastered: 'occasionally',
   showLang: LANGUAGES[0],
 }
+
+export const MAX_LEN_CUSTOM_LIST = 150
+export const MAX_LEN_TRANSLATION = 35

@@ -13,7 +13,7 @@ import React from 'react'
 import { useFormState } from 'react-dom'
 
 import type { StartPreferences } from './flash-cards'
-import { FLUENCY, PREFERENCES_DEFAULT } from '@/const'
+import { FLUENCY, MAX_LEN_CUSTOM_LIST, PREFERENCES_DEFAULT } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
 import { addCards } from '@/db/cards'
@@ -100,6 +100,7 @@ function FlashCardsStart({
           placeholder="List of vocabulary words or phrases"
           multiline={true}
           rows={3}
+          maxLength={MAX_LEN_CUSTOM_LIST}
         />
       )}
       <Container row>
