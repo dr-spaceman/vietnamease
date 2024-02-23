@@ -5,6 +5,7 @@ import {
   CheckButton,
   CheckButtonGroup,
   Container,
+  Dialog,
   Icon,
   Link,
   Menu,
@@ -12,6 +13,8 @@ import {
   MenuItem,
   MenuItemCheckbox,
   MenuProvider,
+  SubmitRow,
+  useDialog,
 } from 'matterial'
 import React from 'react'
 
@@ -50,6 +53,7 @@ function FlashCards(): JSX.Element {
   const [cardIndex, setCardIndex] = React.useState(0)
   const [showCustomStart, setShowCustomStart] = React.useState(false)
   let numMastered = React.useRef(0)
+  const dialog = useDialog(false)
 
   const Progress = React.useCallback(() => {
     if (preferences.hideProgress) {
@@ -110,6 +114,7 @@ function FlashCards(): JSX.Element {
   }
 
   const resetCards = () => {
+    dialog.close()
     setCards([])
     setPreferences(PREFERENCES_DEFAULT)
     setCardIndex(0)
@@ -190,97 +195,121 @@ function FlashCards(): JSX.Element {
   }
 
   return (
-    <Container className={classes.flashCards}>
-      <div className={classes.controls}>
-        <CheckButtonGroup>
-          <CheckButton
-            name="lang"
-            value={LANGUAGES[0]}
-            checked={
-              !preferences.showLang || preferences.showLang === LANGUAGES[0]
-            }
-            onChange={() =>
-              setPreferences({ ...preferences, showLang: LANGUAGES[0] })
-            }
-          >
-            {LANGUAGE_MAP[LANGUAGES[0]]}
-          </CheckButton>
-          <CheckButton
-            name="lang"
-            value={LANGUAGES[1]}
-            checked={preferences.showLang === LANGUAGES[1]}
-            onChange={() =>
-              setPreferences({ ...preferences, showLang: LANGUAGES[1] })
-            }
-          >
-            {LANGUAGE_MAP[LANGUAGES[1]]}
-          </CheckButton>
-        </CheckButtonGroup>
-        <MenuProvider setOpen={open => setKeyboardInputActive(!open)}>
-          <MenuButton shape="circle">
-            <Icon icon="Settings" />
-          </MenuButton>
-          <Menu>
-            <MenuItemCheckbox
-              name=""
-              hideOnClick={false}
-              checked={preferences.hideProgress}
-              onClick={() => {
-                setPreferences({
-                  ...preferences,
-                  hideProgress: !preferences.hideProgress,
-                })
-              }}
-            >
-              Hide session progress
-            </MenuItemCheckbox>
-            <MenuItem
-              hideOnClick={false}
-              style={{ display: 'flex', gap: '0.5em' }}
-            >
-              Include mastered cards
-              {(['occasionally', 'always', 'never'] as const).map(freq => (
-                <a
-                  key={freq}
-                  style={{
-                    textDecoration:
-                      preferences.includeMastered === freq
-                        ? 'underline'
-                        : 'none',
-                  }}
-                  onClick={() =>
-                    setPreferences({ ...preferences, includeMastered: freq })
-                  }
-                >
-                  {freq}
-                </a>
-              ))}
-            </MenuItem>
-            <MenuItem
-              render={
-                <Link href="/add-card" unstyled>
-                  Add a Card
-                </Link>
+    <>
+      <Container className={classes.flashCards}>
+        <div className={classes.controls}>
+          {/* Controls */}
+          <CheckButtonGroup>
+            <CheckButton
+              name="lang"
+              value={LANGUAGES[0]}
+              checked={
+                !preferences.showLang || preferences.showLang === LANGUAGES[0]
               }
+              onChange={() =>
+                setPreferences({ ...preferences, showLang: LANGUAGES[0] })
+              }
+            >
+              {LANGUAGE_MAP[LANGUAGES[0]]}
+            </CheckButton>
+            <CheckButton
+              name="lang"
+              value={LANGUAGES[1]}
+              checked={preferences.showLang === LANGUAGES[1]}
+              onChange={() =>
+                setPreferences({ ...preferences, showLang: LANGUAGES[1] })
+              }
+            >
+              {LANGUAGE_MAP[LANGUAGES[1]]}
+            </CheckButton>
+          </CheckButtonGroup>
+
+          {/* Menu */}
+          <MenuProvider setOpen={open => setKeyboardInputActive(!open)}>
+            <MenuButton shape="circle">
+              <Icon icon="Settings" />
+            </MenuButton>
+            <Menu>
+              <MenuItemCheckbox
+                name=""
+                hideOnClick={false}
+                checked={preferences.hideProgress}
+                onClick={() => {
+                  setPreferences({
+                    ...preferences,
+                    hideProgress: !preferences.hideProgress,
+                  })
+                }}
+              >
+                Hide session progress
+              </MenuItemCheckbox>
+              <MenuItem
+                hideOnClick={false}
+                style={{ display: 'flex', gap: '0.5em' }}
+              >
+                Include mastered cards
+                {(['occasionally', 'always', 'never'] as const).map(freq => (
+                  <a
+                    key={freq}
+                    style={{
+                      textDecoration:
+                        preferences.includeMastered === freq
+                          ? 'underline'
+                          : 'none',
+                    }}
+                    onClick={() =>
+                      setPreferences({ ...preferences, includeMastered: freq })
+                    }
+                  >
+                    {freq}
+                  </a>
+                ))}
+              </MenuItem>
+              <MenuItem
+                render={
+                  <Link href="/add-card" unstyled>
+                    Add a Card
+                  </Link>
+                }
+              />
+              <MenuItem onClick={dialog.open}>Reset (debug)</MenuItem>
+            </Menu>
+          </MenuProvider>
+        </div>
+        {!!cards[cardIndex] ? (
+          <CardsContext.Provider value={[cards, setCards]}>
+            <FlashCard
+              card={cards[cardIndex]}
+              lang={preferences.showLang || LANGUAGES[0]}
+              register={register}
+              progress={<Progress />}
+              toggleLang={toggleLang}
             />
-            <MenuItem onClick={resetCards}>Reset (debug)</MenuItem>
-          </Menu>
-        </MenuProvider>
-      </div>
-      {!!cards[cardIndex] ? (
-        <CardsContext.Provider value={[cards, setCards]}>
-          <FlashCard
-            card={cards[cardIndex]}
-            lang={preferences.showLang || LANGUAGES[0]}
-            register={register}
-            progress={<Progress />}
-            toggleLang={toggleLang}
-          />
-        </CardsContext.Provider>
-      ) : (
-        <FinishedCard />
-      )}
-    </Container>
+          </CardsContext.Provider>
+        ) : (
+          <FinishedCard />
+        )}
+      </Container>
+      <Dialog
+        active={dialog.active}
+        closable
+        onDismiss={dialog.close}
+        title="Confirm reset"
+      >
+        <p>
+          Are you sure you want to reset? Your cards will be permanently
+          removed.
+        </p>
+        <SubmitRow>
+          <Button onClick={dialog.close} variant="contained">
+            Cancel
+          </Button>
+          <Button onClick={resetCards} variant="contained" color="primary">
+            Confirm Reset
+          </Button>
+        </SubmitRow>
+      </Dialog>
+    </>
   )
 }
 

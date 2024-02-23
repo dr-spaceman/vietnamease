@@ -85,7 +85,8 @@
   display: flex;
   gap: 0.2em;
   align-items: center;
-  font-size: x-large;
+  font-size: xx-large;
+  color: var(--color-secondary);
 }
 
 .mastered {
