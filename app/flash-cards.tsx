@@ -1,5 +1,6 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
 import {
   Button,
   CheckButton,
@@ -51,9 +52,11 @@ function FlashCards(): JSX.Element {
     PREFERENCES_DEFAULT
   )
   const [cardIndex, setCardIndex] = React.useState(0)
-  const [showCustomStart, setShowCustomStart] = React.useState(false)
   let numMastered = React.useRef(0)
   const dialog = useDialog(false)
+  const searchParams = useSearchParams()
+
+  const showCustomStart = searchParams.has('custom-start')
 
   const Progress = React.useCallback(() => {
     if (preferences.hideProgress) {
@@ -185,7 +188,7 @@ function FlashCards(): JSX.Element {
             variant="outlined"
             color="primary"
             prepend={<Icon icon="settings" color="primary" />}
-            onClick={() => setShowCustomStart(true)}
+            to="?custom-start"
           >
             Customized Start
           </Button>

@@ -1,7 +1,9 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import {
   Alert,
+  Button,
   CheckButton,
   CheckButtonGroup,
   Container,
@@ -32,9 +34,11 @@ function FlashCardsStart({
   const langKit = useLang()
   const [_, setCards] = React.useContext(CardsContext)
   const [fluencyValue, setFluencyValue] = React.useState('beginner')
+  const router = useRouter()
 
   React.useEffect(() => {
     if (state?.success) {
+      router.replace('/')
       if (state?.translations?.length) {
         const cards = addCards(state.translations.map(lang => ({ lang })))
         setCards(cards)
@@ -42,7 +46,8 @@ function FlashCardsStart({
         throw new Error('No cards were found on the server')
       }
     }
-  }, [state, setCards])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state])
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
     if (!langKit) {
@@ -117,6 +122,9 @@ function FlashCardsStart({
         ))}
       </Container>
       <SubmitRow>
+        <Button variant="contained" onClick={() => router.repalce('/')}>
+          Cancel
+        </Button>
         <SubmitButton variant="contained" color="primary">
           Submit
         </SubmitButton>
