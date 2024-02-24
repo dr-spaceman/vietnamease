@@ -5,7 +5,6 @@ import {
   Alert,
   Button,
   CheckButton,
-  CheckButtonGroup,
   Container,
   Form,
   SubmitRow,
@@ -14,12 +13,11 @@ import {
 import React from 'react'
 import { useFormState } from 'react-dom'
 
-import type { StartPreferences } from './flash-cards'
 import { FLUENCY, MAX_LEN_CUSTOM_LIST, PREFERENCES_DEFAULT } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
 import { addCards } from '@/db/cards'
-import { buildCards } from './actions'
+import { type StartPreferences, buildCards } from './actions'
 import { SubmitButton } from '@/components/submit-button'
 import CardsContext from '@/contexts/cards-context'
 
@@ -33,7 +31,7 @@ function FlashCardsStart({
   const [state, formAction] = useFormState(buildCards, null)
   const langKit = useLang()
   const [_, setCards] = React.useContext(CardsContext)
-  const [fluencyValue, setFluencyValue] = React.useState('beginner')
+  const [generatorValue, setGeneratorValue] = React.useState('copilot')
   const router = useRouter()
 
   React.useEffect(() => {
@@ -58,7 +56,7 @@ function FlashCardsStart({
     const formData = new FormData(form)
     const data = Object.fromEntries(formData.entries()) as StartPreferences
 
-    if (data.fluency === 'custom' && data.vocabList?.trim() === '') {
+    if (data.generator === 'custom' && data.vocabList?.trim() === '') {
       e.preventDefault()
     }
 
@@ -76,38 +74,18 @@ function FlashCardsStart({
         <Alert severity="error">{state.error || 'Something went wrong'}</Alert>
       )}
       <Container row>
-        <CheckButtonGroup>
-          {FLUENCY.map(fluency => (
-            <CheckButton
-              key={fluency}
-              type="radio"
-              name="fluency"
-              value={fluency}
-              defaultChecked={fluency === 'beginner'}
-              onChange={() => setFluencyValue(fluency)}
-            >
-              {capitalize(fluency)}
-            </CheckButton>
-          ))}
+        {FLUENCY.map(fluency => (
           <CheckButton
+            key={fluency}
             type="radio"
             name="fluency"
-            value="custom"
-            onChange={() => setFluencyValue('custom')}
+            value={fluency}
+            defaultChecked={fluency === 'beginner'}
           >
-            Custom List
+            {capitalize(fluency)}
           </CheckButton>
-        </CheckButtonGroup>
+        ))}
       </Container>
-      {fluencyValue === 'custom' && (
-        <TextInput
-          name="vocabList"
-          placeholder="List of vocabulary words or phrases"
-          multiline={true}
-          rows={3}
-          maxLength={MAX_LEN_CUSTOM_LIST}
-        />
-      )}
       <Container row>
         {DIALECTS.map(dialect => (
           <CheckButton
@@ -121,6 +99,34 @@ function FlashCardsStart({
           </CheckButton>
         ))}
       </Container>
+      <Container row>
+        <CheckButton
+          type="radio"
+          name="generator"
+          value="copilot"
+          defaultChecked={true}
+          onChange={() => setGeneratorValue('copilot')}
+        >
+          Use copilot to generate vocabulary
+        </CheckButton>
+        <CheckButton
+          type="radio"
+          name="generator"
+          value="custom"
+          onChange={() => setGeneratorValue('custom')}
+        >
+          Custom List
+        </CheckButton>
+      </Container>
+      {generatorValue === 'custom' && (
+        <TextInput
+          name="vocabList"
+          placeholder="List of vocabulary words or phrases"
+          multiline={true}
+          rows={3}
+          maxLength={MAX_LEN_CUSTOM_LIST}
+        />
+      )}
       <SubmitRow>
         <Button variant="contained" onClick={() => router.replace('/')}>
           Cancel

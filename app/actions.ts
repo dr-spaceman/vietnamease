@@ -2,8 +2,7 @@
 
 import OpenAI from 'openai'
 
-import type { StartPreferences } from './flash-cards'
-import { LANGUAGES, LANGUAGE_MAP, MAX_LEN_CUSTOM_LIST } from '@/const'
+import { FLUENCY, LANGUAGES, LANGUAGE_MAP, MAX_LEN_CUSTOM_LIST } from '@/const'
 import {
   findTranslationSet,
   type TranslationSearchParams,
@@ -11,6 +10,13 @@ import {
 import delay from '@/utils/delay'
 import getEnv from '@/utils/get-env'
 import extractJson from '@/utils/extract-json'
+
+export type StartPreferences = {
+  dialect: 'Northern' | 'Central' | 'Southern'
+  fluency: (typeof FLUENCY)[number]
+  generator: 'copilot' | 'custom'
+  vocabList?: string
+}
 
 type ResponseSuccess = {
   success: true
@@ -21,23 +27,6 @@ export type Response = ResponseSuccess | ResponseFail | null
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
-// function parseTranslation(content: string) {
-//   const lines = content.split('\n')
-//   const translationArray: Translation[] = []
-
-//   lines.forEach(line => {
-//     const langs = line.split('|')
-//     if (langs[0] && langs[1]) {
-//       translationArray.push({
-//         [LANGUAGES[0]]: langs[0].trim(),
-//         [LANGUAGES[1]]: langs[1].trim(),
-//       })
-//     }
-//   })
-
-//   return translationArray
-// }
-
 async function buildCards(
   prevState: Response,
   formData: FormData
@@ -46,7 +35,7 @@ async function buildCards(
     const params = Object.fromEntries(formData.entries()) as StartPreferences
     console.log(params, formData, prevState)
 
-    if (params.fluency !== 'custom') {
+    if (params.generator !== 'custom') {
       const buildParams: TranslationSearchParams = ['lang:en', 'lang:vi']
       if (params.fluency) {
         buildParams.push(`fluency:${params.fluency}`)
@@ -96,7 +85,7 @@ async function buildCards(
       description: 'translate Vietnamese and English words',
     }
 
-    if (params.fluency === 'custom') {
+    if (params.generator === 'custom') {
       if (!params.vocabList) {
         throw new Error('User-input vocab list needed')
       }
@@ -138,7 +127,6 @@ async function buildCards(
       function_call: { name: 'translate' },
       temperature: 0.2,
       max_tokens: 128 + 64,
-      // top_p: 1,
     }
     const chatCompletion: OpenAI.Chat.ChatCompletion =
       await openai.chat.completions.create(chatParams)

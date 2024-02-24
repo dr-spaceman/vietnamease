@@ -36,12 +36,6 @@ import CardsContext from '@/contexts/cards-context'
 import useCards from '@/utils/use-cards'
 import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
 
-export type StartPreferences = {
-  dialect: 'Northern' | 'Central' | 'Southern'
-  fluency: (typeof FLUENCY)[number] | 'custom'
-  vocabList?: string
-}
-
 const masteredLevel =
   LEVELS.find(level => level.description === 'mastered')?.level || 20
 
