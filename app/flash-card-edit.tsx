@@ -49,7 +49,7 @@ function FlashCardEdit({
         onChange={handleChange(1)}
       />
       <SubmitRow>
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="secondary" onClick={handleSubmit}>
           Submit
         </Button>
         <Button onClick={onFinish}>Cancel</Button>

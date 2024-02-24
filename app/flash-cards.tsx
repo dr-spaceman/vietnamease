@@ -307,7 +307,7 @@ function FlashCards(): JSX.Element {
           <Button onClick={dialog.close} variant="contained">
             Cancel
           </Button>
-          <Button onClick={resetCards} variant="contained" color="primary">
+          <Button onClick={resetCards} variant="contained" color="secondary">
             Confirm Reset
           </Button>
         </SubmitRow>

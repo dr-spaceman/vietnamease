@@ -1,5 +1,5 @@
 :root {
-  --color-secondary: #22daf4;
+  --color-secondary: #1acde5;
   --color-secondary-hover: #59e3f6;
   --color-primary: #f36458;
   --color-primary-hover: #f68b82;
@@ -18,9 +18,9 @@
 }
 
 /* Better contrast with cyan */
-button.color--secondary {
+/* button.color--secondary {
   color: rgb(57, 57, 57);
-}
+} */
 
 body {
   margin: 0;

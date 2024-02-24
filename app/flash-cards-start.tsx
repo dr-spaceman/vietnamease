@@ -122,10 +122,10 @@ function FlashCardsStart({
         ))}
       </Container>
       <SubmitRow>
-        <Button variant="contained" onClick={() => router.repalce('/')}>
+        <Button variant="contained" onClick={() => router.replace('/')}>
           Cancel
         </Button>
-        <SubmitButton variant="contained" color="primary">
+        <SubmitButton variant="contained" color="secondary">
           Submit
         </SubmitButton>
       </SubmitRow>
