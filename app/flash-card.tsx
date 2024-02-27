@@ -9,6 +9,7 @@ import {
   MenuItem,
   MenuProvider,
   VisuallyHidden,
+  useAlert,
 } from 'matterial'
 import * as React from 'react'
 
@@ -55,12 +56,23 @@ function FlashCard({
   // try {
   const [edit, setEdit] = React.useState(false)
   const { playAudio } = useAudio()
-  const [showAlert, setShowAlert] = React.useState(false)
+  const [Alert, setAlert] = useAlert()
 
   const handleAudio = (word: string) => {
-    playAudio(word)
-    setShowAlert(true)
-    delay(5000).then(() => setShowAlert(false))
+    setAlert({
+      message: `The TTS voice you are hearing is AI-generated and not a human voice`,
+      icon: true,
+    })
+    delay(5000).then(() => setAlert(null))
+
+    playAudio(word).catch(e => {
+      console.error(e)
+      setAlert({
+        message: 'There was an error playing the audio',
+        severity: 'error',
+        icon: true,
+      })
+    })
   }
 
   React.useEffect(() => {
@@ -147,11 +159,7 @@ function FlashCard({
           </Menu>
         </MenuProvider>
       </div>
-      {showAlert && (
-        <Alert severity="info" icon>
-          The TTS voice you are hearing is AI-generated and not a human voice
-        </Alert>
-      )}
+      <Alert />
 
       {/* <Container row>
           <Button
