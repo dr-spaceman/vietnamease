@@ -20,12 +20,13 @@
     0 1px 2px -1px var(--color-shadow);
   border-radius: var(--radius);
   position: relative;
-  cursor: pointer;
 }
 
 .flashCard big {
   font-size: x-large;
   letter-spacing: -0.02em;
+  cursor: pointer;
+  padding: 1em 2em;
 }
 
 .level {
@@ -112,6 +113,9 @@
 
 .controls > *:last-child {
   flex-shrink: 0;
+}
+
+.audioButton {
 }
 
 @media screen and (max-width: 640px) {

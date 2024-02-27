@@ -1,6 +1,8 @@
 'use client'
 
 import {
+  Alert,
+  Button,
   Icon,
   Menu,
   MenuButton,
@@ -17,6 +19,8 @@ import {
   isKeyboardInputActive,
   setKeyboardInputActive,
 } from '@/utils/keyboard-input-active'
+import useAudio from '@/utils/use-audio'
+import delay from '@/utils/delay'
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -50,6 +54,14 @@ function FlashCard({
 }): JSX.Element {
   // try {
   const [edit, setEdit] = React.useState(false)
+  const { playAudio } = useAudio()
+  const [showAlert, setShowAlert] = React.useState(false)
+
+  const handleAudio = (word: string) => {
+    playAudio(word)
+    setShowAlert(true)
+    delay(5000).then(() => setShowAlert(false))
+  }
 
   React.useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -91,8 +103,18 @@ function FlashCard({
 
   return (
     <>
-      <div className={classes.flashCard} onClick={toggleLang}>
-        <big>{card.lang[lang]}</big>
+      <div className={classes.flashCard}>
+        <div className={classes.wordContainer}>
+          <big onClick={toggleLang}>{card.lang[lang]}</big>
+          <Button
+            shape="circle"
+            className={classes.audioButton}
+            onClick={() => handleAudio(card.lang[lang])}
+          >
+            <Icon icon="volumeFull" aria-hidden="true" />
+            <VisuallyHidden>Play audio</VisuallyHidden>
+          </Button>
+        </div>
         <small
           className={classes.level}
           style={
@@ -125,6 +147,12 @@ function FlashCard({
           </Menu>
         </MenuProvider>
       </div>
+      {showAlert && (
+        <Alert severity="info" icon>
+          The TTS voice you are hearing is AI-generated and not a human voice
+        </Alert>
+      )}
+
       {/* <Container row>
           <Button
             shape="circle"
