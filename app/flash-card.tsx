@@ -13,7 +13,7 @@ import {
 } from 'matterial'
 import * as React from 'react'
 
-import { LEVELS } from '@/const'
+import { LANGUAGES, LEVELS } from '@/const'
 import classes from './flash-cards.module.css'
 import FlashCardEdit from './flash-card-edit'
 import {
@@ -88,6 +88,8 @@ function FlashCard({
         register('increment')
       } else if (event.key === 'ArrowUp') {
         register(null)
+      } else if (event.key === 'p') {
+        handleAudio(card.lang[lang])
       }
     }
 
@@ -96,7 +98,8 @@ function FlashCard({
     return () => {
       document.removeEventListener('keydown', handleKeyPress)
     }
-  }, [register, toggleLang, edit])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [register, toggleLang, edit, card, lang])
 
   const thisLevel = findLevel(card.level)
 
@@ -109,15 +112,17 @@ function FlashCard({
       <div className={classes.flashCard}>
         <div className={classes.wordContainer}>
           <big onClick={toggleLang}>{card.lang[lang]}</big>
-          <Button
-            shape="circle"
-            className={classes.audioButton}
-            loading={audioState.loading}
-            onClick={() => handleAudio(card.lang[lang])}
-          >
-            <Icon icon="volumeFull" aria-hidden="true" size="1.5em" />
-            <VisuallyHidden>Play audio</VisuallyHidden>
-          </Button>
+          {lang === LANGUAGES[1] && (
+            <Button
+              shape="circle"
+              className={classes.audioButton}
+              loading={audioState.loading}
+              onClick={() => handleAudio(card.lang[lang])}
+            >
+              <Icon icon="volumeFull" aria-hidden="true" size="1.5em" />
+              <VisuallyHidden>Play audio</VisuallyHidden>
+            </Button>
+          )}
         </div>
         <small
           className={classes.level}
