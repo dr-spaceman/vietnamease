@@ -4,20 +4,30 @@ interface AudioCache {
   [key: string]: ArrayBuffer
 }
 
-function useAudio() {
-  const [cache, setCache] = React.useState<AudioCache>({})
-  const audioContext = React.useRef<AudioContext>()
+// How many audio buffers to keep in memory
+const CACHE_LIMIT = 20
 
-  if (!audioContext.current) {
+function useAudio() {
+  const cache = React.useRef(new Map<string, ArrayBuffer>()).current
+  const audioContext = React.useRef<AudioContext | null>()
+
+  React.useEffect(() => {
     audioContext.current = new (window.AudioContext || // @ts-ignore
       window.webkitAudioContext)()
-  }
+
+    return () => {
+      if (audioContext.current) {
+        audioContext.current.close()
+        audioContext.current = null
+      }
+    }
+  }, [])
 
   const playAudio = async (word: string) => {
     try {
       let arrayBuffer: ArrayBuffer
-      if (word in cache) {
-        arrayBuffer = cache[word]
+      if (cache.has(word)) {
+        arrayBuffer = cache.get(word)!
       } else {
         const response = await fetch(`/api/generate-audio`, {
           method: 'POST',
@@ -25,7 +35,11 @@ function useAudio() {
           body: JSON.stringify({ word }),
         })
         arrayBuffer = await response.arrayBuffer()
-        setCache(cache_ => ({ ...cache_, [word]: arrayBuffer }))
+        if (cache.size >= CACHE_LIMIT) {
+          const oldestKey = cache.keys().next().value
+          cache.delete(oldestKey)
+        }
+        cache.set(word, arrayBuffer)
       }
       if (!audioContext.current) {
         throw new Error('Audio context not found.')
