@@ -22,11 +22,23 @@
   position: relative;
 }
 
+.wordContainer {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  position: relative;
+}
+
 .flashCard big {
   font-size: x-large;
   letter-spacing: -0.02em;
   cursor: pointer;
-  padding: 1em 2em;
+  padding: 1em;
+}
+
+.audioButton {
+  position: absolute;
+  right: -3em;
 }
 
 .level {
@@ -113,9 +125,6 @@
 
 .controls > *:last-child {
   flex-shrink: 0;
-}
-
-.audioButton {
 }
 
 @media screen and (max-width: 640px) {

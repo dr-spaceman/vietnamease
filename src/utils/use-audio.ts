@@ -1,20 +1,20 @@
 import * as React from 'react'
 
-interface AudioCache {
-  [key: string]: ArrayBuffer
+type State = {
+  loading: boolean
 }
 
 // How many audio buffers to keep in memory
 const CACHE_LIMIT = 20
 
+const defaultState: State = { loading: false }
+
 function useAudio() {
   const cache = React.useRef(new Map<string, ArrayBuffer>()).current
   const audioContext = React.useRef<AudioContext | null>()
+  const [audioState, setState] = React.useState<State>(defaultState)
 
   React.useEffect(() => {
-    audioContext.current = new (window.AudioContext || // @ts-ignore
-      window.webkitAudioContext)()
-
     return () => {
       if (audioContext.current) {
         audioContext.current.close()
@@ -24,10 +24,18 @@ function useAudio() {
   }, [])
 
   const playAudio = async (word: string) => {
+    if (!audioContext.current) {
+      audioContext.current = new (window.AudioContext || // @ts-ignore
+        window.webkitAudioContext)()
+    }
+
     let arrayBuffer: ArrayBuffer
     if (cache.has(word)) {
       arrayBuffer = cache.get(word)!
     } else {
+      // Only indicate loading state if the audio is not in the cache
+      setState(audioState => ({ ...audioState, loading: true }))
+
       const response = await fetch(`/api/generate-audio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,9 +66,11 @@ function useAudio() {
     source.buffer = decodedAudioData
     source.connect(audioContext.current.destination)
     source.start(0) // Play immediately
+
+    setState(audioState => ({ ...audioState, loading: false }))
   }
 
-  return { playAudio }
+  return { playAudio, audioState }
 }
 
 export default useAudio

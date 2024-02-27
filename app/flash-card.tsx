@@ -55,7 +55,7 @@ function FlashCard({
 }): JSX.Element {
   // try {
   const [edit, setEdit] = React.useState(false)
-  const { playAudio } = useAudio()
+  const { playAudio, audioState } = useAudio()
   const [Alert, setAlert] = useAlert()
 
   const handleAudio = (word: string) => {
@@ -100,15 +100,6 @@ function FlashCard({
 
   const thisLevel = findLevel(card.level)
 
-  const stopBubbling = (action?: string) => (event: React.MouseEvent) => {
-    event.stopPropagation()
-    if (action === 'setEdit') {
-      setEdit(true)
-    } else if (action === 'delete') {
-      register('delete')
-    }
-  }
-
   if (edit) {
     return <FlashCardEdit card={card} onFinish={() => setEdit(false)} />
   }
@@ -121,9 +112,10 @@ function FlashCard({
           <Button
             shape="circle"
             className={classes.audioButton}
+            loading={audioState.loading}
             onClick={() => handleAudio(card.lang[lang])}
           >
-            <Icon icon="volumeFull" aria-hidden="true" />
+            <Icon icon="volumeFull" aria-hidden="true" size="1.5em" />
             <VisuallyHidden>Play audio</VisuallyHidden>
           </Button>
         </div>
@@ -140,18 +132,14 @@ function FlashCard({
         </small>
         {progress}
         <MenuProvider setOpen={open => setKeyboardInputActive(!open)}>
-          <MenuButton
-            shape="circle"
-            className={classes.menuButton}
-            onClick={stopBubbling()}
-          >
+          <MenuButton shape="circle" className={classes.menuButton}>
             <Icon icon="Menu" aria-hidden="true" />
             <VisuallyHidden>Card Menu</VisuallyHidden>
           </MenuButton>
           <Menu>
-            <MenuItem onClick={stopBubbling('setEdit')}>Edit</MenuItem>
+            <MenuItem onClick={() => setEdit(true)}>Edit</MenuItem>
             <MenuItem
-              onClick={stopBubbling('delete')}
+              onClick={() => register('delete')}
               style={{ color: 'var(--color-error)' }}
             >
               Delete
