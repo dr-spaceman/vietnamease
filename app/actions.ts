@@ -125,7 +125,7 @@ async function buildCards(
       ],
       functions: [translateFunction],
       function_call: { name: 'translate' },
-      temperature: 0.2,
+      temperature: 0.1,
       max_tokens: 128 + 64,
     }
     const chatCompletion: OpenAI.Chat.ChatCompletion =
