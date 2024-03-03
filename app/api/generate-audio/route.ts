@@ -10,7 +10,9 @@ const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
 export const runtime = 'edge'
 
-export async function POST(request: NextRequest & { body: RequestBody }) {
+export async function POST(
+  request: NextRequest & { body: RequestBody }
+): Promise<void | Response> {
   try {
     const { word } = (await request.json()) as RequestBody
 
@@ -37,6 +39,6 @@ export async function POST(request: NextRequest & { body: RequestBody }) {
       },
     })
   } catch (error: unknown) {
-    return { success: false, error: String(error) }
+    return new NextResponse(String(error), { status: 400 })
   }
 }
