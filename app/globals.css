@@ -29,10 +29,14 @@ body {
   line-height: 160%;
 }
 
-.page-header {
+.page-header,
+.page-footer {
   width: 100%;
   max-width: var(--layout-max-width);
   margin: var(--layout-v-spacing) auto;
+}
+
+.page-header {
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -43,6 +47,10 @@ body {
 @media screen and (min-width: 640px) {
   .page-header {
     margin-bottom: var(--space-large);
+  }
+
+  .page-footer {
+    margin-top: var(--space-large);
   }
 }
 
