@@ -1,13 +1,14 @@
 import { Metadata, Viewport } from 'next'
 
-type PageData = { metadata?: Metadata; viewport?: Viewport }
+type PageData = { metadata: Metadata; viewport: Viewport }
 
 export default function generatePageData({
   metadata,
   viewport,
-}: PageData = {}): PageData {
+}: Partial<PageData> = {}): PageData {
   const metadataWithDefaults = {
     ...metadata,
+    applicationName: metadata?.applicationName ?? 'Vietnamease',
     title:
       metadata?.title ?? 'Vietnamease App - Your copilot to learn Vietnamese',
     description:
