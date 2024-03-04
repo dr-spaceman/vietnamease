@@ -22,6 +22,7 @@ import {
 } from '@/utils/keyboard-input-active'
 import useAudio from '@/utils/use-audio'
 import delay from '@/utils/delay'
+import useOnlineStatus from '@/utils/use-online-status'
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -57,6 +58,7 @@ function FlashCard({
   const [edit, setEdit] = React.useState(false)
   const { playAudio, audioState } = useAudio()
   const [Alert, setAlert] = useAlert()
+  const onlineStatus = useOnlineStatus()
 
   const handleAudio = (word: string) => {
     setAlert({
@@ -117,6 +119,7 @@ function FlashCard({
               shape="circle"
               className={classes.audioButton}
               loading={audioState.loading}
+              disabled={!onlineStatus}
               onClick={() => handleAudio(card.lang[lang])}
             >
               <Icon icon="volumeFull" aria-hidden="true" size="1.5em" />
