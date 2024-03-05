@@ -85,6 +85,13 @@ async function createChat() {
   }
 
   const run = async () => {
+    let runs = await openai.beta.threads.runs.list(thread.id)
+    if (runs.data.length > 0) {
+      console.warn('closing existing runs', runs)
+      runs.data.forEach(async run => {
+        await openai.beta.threads.runs.cancel(thread.id, run.id)
+      })
+    }
     let run = await openai.beta.threads.runs.create(thread.id, {
       assistant_id: assistant.id,
     })
