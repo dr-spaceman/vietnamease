@@ -1,10 +1,14 @@
 'use client'
 
 import { Button, Icon, Link, TextInput } from 'matterial'
+
 import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
+import useOnlineStatus from '@/utils/use-online-status'
 import { MAX_LEN_TRANSLATION } from '@/const'
 
 function Header() {
+  const onlineStatus = useOnlineStatus()
+
   return (
     <header className="page-header">
       <h1>
@@ -20,7 +24,12 @@ function Header() {
             onFocus={() => setKeyboardInputActive(false)}
             onBlur={() => setKeyboardInputActive(true)}
           />
-          <Button shape="circle" color="primary" type="submit">
+          <Button
+            shape="circle"
+            color="primary"
+            type="submit"
+            disabled={!onlineStatus}
+          >
             <Icon icon="Search" />
           </Button>
         </div>
