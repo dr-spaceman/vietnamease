@@ -4,9 +4,12 @@ const nextConfig = {}
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
   fallbacks: {
-    // Failed page requests fallback to this.
     document: '/~offline',
   },
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  cacheStartUrl: true,
+  dynamicStartUrl: true,
 })
 
 module.exports = withPWA(nextConfig)
