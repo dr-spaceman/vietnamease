@@ -34,6 +34,10 @@ body {
   width: 100%;
   max-width: var(--layout-max-width);
   margin: var(--layout-v-spacing) auto;
+
+  &:empty {
+    display: none;
+  }
 }
 
 .page-header {
