@@ -16,7 +16,7 @@ function Header({ user }: { user?: User }) {
 
   React.useEffect(() => {
     if (stateLogin?.success === false) {
-      alert('Login failed')
+      alert(stateLogin.error)
     }
   }, [stateLogin])
 
