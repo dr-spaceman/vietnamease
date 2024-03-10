@@ -15,7 +15,9 @@ function Header({ user }: { user?: User }) {
   const { pending } = useFormStatus()
 
   React.useEffect(() => {
-    console.log('state', stateLogin)
+    if (stateLogin?.success === false) {
+      alert('Login failed')
+    }
   }, [stateLogin])
 
   return (
