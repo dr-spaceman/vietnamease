@@ -87,7 +87,7 @@ export default function RootLayout({
   return (
     <Html config={config} className={inter.className}>
       <Body>
-        <Header />
+        <Header user={session?.user} />
         {cookies().has('loginError') && (
           <Alert severity="error">{cookies().get('loginError')?.value}</Alert>
         )}

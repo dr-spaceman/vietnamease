@@ -10,6 +10,7 @@ import {
 import delay from '@/utils/delay'
 import getEnv from '@/utils/get-env'
 import extractJson from '@/utils/extract-json'
+import { login, logout } from '@/lib/session'
 
 export type StartPreferences = {
   dialect: 'Northern' | 'Central' | 'Southern'
@@ -18,19 +19,25 @@ export type StartPreferences = {
   vocabList?: string
 }
 
-type ResponseSuccess = {
-  success: true
-  translations: Translation[]
-}
+type ResponseSuccess = { success: true }
 type ResponseFail = { success: false; error: string }
-export type Response = ResponseSuccess | ResponseFail | null
+type Response = ResponseSuccess | ResponseFail
+
+export type BuildCardsResponse =
+  | (ResponseSuccess & { translations: Translation[] })
+  | ResponseFail
+  | null
+export type LoginResponse =
+  | (ResponseSuccess & { data: LoginData })
+  | ResponseFail
+  | null
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_KEY') })
 
 async function buildCards(
-  prevState: Response,
+  prevState: BuildCardsResponse,
   formData: FormData
-): Promise<Response> {
+): Promise<BuildCardsResponse> {
   try {
     const params = Object.fromEntries(formData.entries()) as StartPreferences
     console.log(params, formData, prevState)
@@ -162,4 +169,41 @@ async function buildCards(
   }
 }
 
-export { buildCards }
+async function handleLogin(
+  prevState: LoginResponse,
+  formData: FormData
+): Promise<LoginResponse> {
+  try {
+    const form = Object.fromEntries(formData.entries())
+    const apiUrl = getEnv('API_URL')
+    const loginRes = await fetch(`${apiUrl}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(form),
+    })
+    if (!loginRes.ok) {
+      throw new Error('Login failed')
+    }
+    const data = (await loginRes.json()) as LoginData
+
+    login(data)
+
+    return { success: true, data }
+  } catch (error: unknown) {
+    return { success: false, error: String(error) }
+  }
+}
+
+async function handleLogout(): Promise<Response> {
+  try {
+    logout()
+
+    return { success: true }
+  } catch (error: unknown) {
+    return { success: false, error: String(error) }
+  }
+}
+
+export { buildCards, handleLogin, handleLogout }

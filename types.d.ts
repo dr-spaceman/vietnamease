@@ -57,11 +57,23 @@ declare global {
     color: string
   }
 
+  type LoginData = { accessToken: string; user: User }
+
   /** User actions on a card */
   type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
 
-  type Session = { sessionId: string }
+  type Session = {
+    accessToken?: string
+    loggedIn?: boolean
+    sessionId: string
+    user?: User
+  }
 
   /** @example { en: 'beautiful', vi: 'đẹp' } */
   type Translation = { [K in Language]: string }
+
+  type User = {
+    id: number
+    name: string
+  }
 }

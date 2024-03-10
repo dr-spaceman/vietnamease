@@ -1,13 +1,22 @@
 'use client'
 
+import * as React from 'react'
 import { Button, Icon, Link, TextInput } from 'matterial'
+import { useFormState, useFormStatus } from 'react-dom'
 
 import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
 import useOnlineStatus from '@/utils/use-online-status'
 import { MAX_LEN_TRANSLATION } from '@/const'
+import { handleLogin, handleLogout } from './actions'
 
-function Header() {
+function Header({ user }: { user?: User }) {
   const onlineStatus = useOnlineStatus()
+  const [stateLogin, formActionLogin] = useFormState(handleLogin, null)
+  const { pending } = useFormStatus()
+
+  React.useEffect(() => {
+    console.log('state', stateLogin)
+  }, [stateLogin])
 
   return (
     <header className="page-header">
@@ -34,6 +43,26 @@ function Header() {
           </Button>
         </div>
       </form>
+      {user ? (
+        <div>
+          <b>{JSON.stringify(user)}</b>
+          <Button
+            onClick={async () => {
+              await handleLogout()
+            }}
+          >
+            Sign Out
+          </Button>
+        </div>
+      ) : (
+        <form action={formActionLogin}>
+          <input type="hidden" name="username" value="galmodovar" />
+          <input type="hidden" name="password" value="password123" />
+          <Button type="submit" loading={pending}>
+            Sign In
+          </Button>
+        </form>
+      )}
     </header>
   )
 }
