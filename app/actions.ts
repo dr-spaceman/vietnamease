@@ -183,11 +183,15 @@ async function handleLogin(
       },
       body: JSON.stringify(form),
     })
-    if (!loginRes.ok) {
-      throw new Error('Login failed')
-    }
-    const data = (await loginRes.json()) as LoginData
 
+    if (!loginRes.ok) {
+      const errorData = await loginRes.json()
+      const errorMessage = errorData?.error?.message || 'Login failed'
+      console.error(errorData)
+      throw new Error(errorMessage)
+    }
+
+    const data = (await loginRes.json()) as LoginData
     login(data)
 
     return { success: true, data }
