@@ -77,14 +77,17 @@ function FlashCard({
     })
   }
 
+  // Track user actions to determine long key press
+  const initialPressRef = React.useRef(true)
+  const timerRef = React.useRef<null | number>(null)
   React.useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (edit || !isKeyboardInputActive()) {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (edit || !isKeyboardInputActive() || !initialPressRef.current) {
         return
       }
-      if (event.key === ' ') {
-        toggleLang()
-      } else if (event.key === 'ArrowLeft') {
+      initialPressRef.current = false
+      timerRef.current = new Date().getTime()
+      if (event.key === 'ArrowLeft') {
         register('decrement')
       } else if (event.key === 'ArrowRight') {
         register('increment')
@@ -92,16 +95,30 @@ function FlashCard({
         register(null)
       } else if (event.key === 'p') {
         handleAudio(card.lang[lang])
+      } else if (event.key === ' ') {
+        toggleLang()
       }
     }
 
-    document.addEventListener('keydown', handleKeyPress)
+    const handleKeyUp = (event: KeyboardEvent) => {
+      initialPressRef.current = true
+      const duration = new Date().getTime() - Number(timerRef.current)
+      if (event.key === ' ') {
+        if (duration > 200) {
+          toggleLang()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('keyup', handleKeyUp)
 
     return () => {
-      document.removeEventListener('keydown', handleKeyPress)
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('keyup', handleKeyUp)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [register, toggleLang, edit, card, lang])
+  }, [card.lang, edit, lang, register, toggleLang])
 
   const thisLevel = findLevel(card.level)
 
