@@ -175,14 +175,27 @@ async function handleLogin(
 ): Promise<LoginResponse> {
   try {
     const form = Object.fromEntries(formData.entries())
+    if (
+      !form.action ||
+      !['login', 'register'].includes(form.action as string)
+    ) {
+      console.error('Critical error: Invalid form `action`', form.action)
+      throw new Error(
+        'Sorry! There was a problem with the form data and the action could not be processed'
+      )
+    }
+
     const apiUrl = getEnv('API_URL')
-    const loginRes = await fetch(`${apiUrl}/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(form),
-    })
+    const loginRes = await fetch(
+      `${apiUrl}/${form.action === 'login' ? 'login' : 'users'}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      }
+    )
 
     if (!loginRes.ok) {
       const errorData = await loginRes.json()

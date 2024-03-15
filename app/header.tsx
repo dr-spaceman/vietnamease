@@ -44,7 +44,15 @@ function LoginForm() {
         style={{ maxWidth: '20em' }}
       >
         <Form action={formActionLogin}>
+          <input
+            type="hidden"
+            name="action"
+            value={state === 'signin' ? 'login' : 'register'}
+          />
           <TextInput type="email" name="email" placeholder="Email" required />
+          {state === 'signup' && (
+            <TextInput name="name" placeholder="Name" required />
+          )}
           <TextInput
             type="password"
             name="password"
@@ -60,7 +68,7 @@ function LoginForm() {
               variant="contained"
               color="secondary"
               loading={pending}
-              disabled={state === 'signup'}
+              disabled={pending}
             >
               {state === 'signin' ? 'Sign In' : 'Sign Up'}
             </Button>
@@ -101,7 +109,6 @@ function Header({ user }: { user?: User }) {
       </form>
       {user ? (
         <div>
-          <b>{JSON.stringify(user)}</b>
           <Button
             onClick={async () => {
               await handleLogout()

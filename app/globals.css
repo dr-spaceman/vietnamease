@@ -48,6 +48,10 @@ body {
   position: relative;
 }
 
+.page-header > *:last-child {
+  margin-left: auto;
+}
+
 @media screen and (min-width: 640px) {
   .page-header {
     margin-bottom: var(--space-large);
