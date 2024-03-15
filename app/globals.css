@@ -90,6 +90,12 @@ body {
   flex-shrink: 0;
 }
 
+@media screen and (min-width: 640px) {
+  .page-header__search {
+    width: 8.7em;
+  }
+}
+
 .page-header__search button {
   position: absolute;
   z-index: 1;

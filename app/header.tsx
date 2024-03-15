@@ -17,6 +17,7 @@ import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
 import useOnlineStatus from '@/utils/use-online-status'
 import { MAX_LEN_TRANSLATION } from '@/const'
 import { handleLogin, handleLogout } from './actions'
+import useMediaQuery from '@/utils/use-media-query'
 
 function LoginForm() {
   const { pending } = useFormStatus()
@@ -81,19 +82,30 @@ function LoginForm() {
 
 function Header({ user }: { user?: User }) {
   const onlineStatus = useOnlineStatus()
+  const isScreenMobile = useMediaQuery('(max-width: 640px)')
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const checkForm = (e: React.FormEvent<HTMLFormElement>) => {
+    if (!inputRef.current?.value) {
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+  }
 
   return (
     <header className="page-header">
       <h1>
         <Link href="/">Vietnamease</Link>
       </h1>
-      <form action="d" method="get">
+      <form action="d" method="get" onSubmit={checkForm}>
         <div className="page-header__search">
           <TextInput
             name="q"
-            placeholder="'hello' or 'xin chao'"
+            placeholder={isScreenMobile ? '' : "'hello' or 'xin chao'"}
             maxLength={MAX_LEN_TRANSLATION}
-            width="8.7em"
+            width={isScreenMobile ? undefined : '8.7em'}
+            // @ts-ignore
+            ref={inputRef}
             onFocus={() => setKeyboardInputActive(false)}
             onBlur={() => setKeyboardInputActive(true)}
           />
