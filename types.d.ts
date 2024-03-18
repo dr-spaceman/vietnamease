@@ -26,7 +26,7 @@ declare global {
 
   type Languages = keyof typeof LANGUAGE_MAP
 
-  type Language = string // (typeof LANGUAGES)[number]
+  type Language = (typeof LANGUAGES)[number]
 
   type LanguageKit = {
     /** The IANA language tag, eg 'en', without the country tag */
@@ -69,8 +69,8 @@ declare global {
     user?: User
   }
 
-  /** @example { en: 'beautiful', vi: 'đẹp' } */
-  type Translation = { [K in Language]: string }
+  /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
+  type Translation = { en: string; vi: string; examples?: LangPair[] }
 
   type User = {
     id: number

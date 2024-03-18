@@ -41,6 +41,19 @@ function levelCompletion(level: number): number {
   return completion
 }
 
+function formatExample(example: string): JSX.Element {
+  const regex = /__(.*?)__/g
+  let parts = example.split(regex)
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        index % 2 === 0 ? part : <strong key={index}>{part}</strong>
+      )}
+    </>
+  )
+}
+
 function FlashCard({
   card,
   lang,
@@ -143,6 +156,11 @@ function FlashCard({
               <VisuallyHidden>Play audio</VisuallyHidden>
             </Button>
           )}
+        </div>
+        <div className={classes.example}>
+          {card.lang.examples
+            ? formatExample(card.lang.examples[0][lang])
+            : undefined}
         </div>
         <small
           className={classes.level}

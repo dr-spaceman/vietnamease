@@ -33,12 +33,17 @@
   font-size: x-large;
   letter-spacing: -0.02em;
   cursor: pointer;
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .audioButton {
   position: absolute;
   right: -3em;
+}
+
+.example {
+  font-size: 80%;
+  color: var(--color-accent-6);
 }
 
 .level {
