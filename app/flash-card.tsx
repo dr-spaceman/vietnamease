@@ -48,7 +48,7 @@ function formatExample(example: string): JSX.Element {
   return (
     <>
       {parts.map((part, index) =>
-        index % 2 === 0 ? part : <strong key={index}>{part}</strong>
+        index % 2 === 0 ? part : <b key={index}>{part}</b>
       )}
     </>
   )
@@ -73,14 +73,19 @@ function FlashCard({
   const [Alert, setAlert] = useAlert()
   const onlineStatus = useOnlineStatus()
 
-  const handleAudio = (word: string) => {
-    setAlert({
-      message: `The TTS voice you are hearing is AI-generated and not a human voice`,
-      icon: true,
-    })
-    delay(5000).then(() => setAlert(null))
+  const handleAudio = () => {
+    // setAlert({
+    //   message: `The TTS voice you are hearing is AI-generated and not a human voice`,
+    //   icon: true,
+    // })
+    // delay(5000).then(() => setAlert(null))
 
-    playAudio(word).catch(e => {
+    let transcribe = card.lang[lang]
+    if (card.lang.examples) {
+      transcribe = card.lang.examples[0][lang]
+    }
+
+    playAudio(transcribe).catch(e => {
       console.error(e)
       setAlert({
         message: 'There was an error playing the audio',
@@ -107,7 +112,7 @@ function FlashCard({
       } else if (event.key === 'ArrowUp') {
         register(null)
       } else if (event.key === 'p') {
-        handleAudio(card.lang[lang])
+        handleAudio()
       } else if (event.key === ' ') {
         toggleLang()
       }
@@ -150,7 +155,7 @@ function FlashCard({
               className={classes.audioButton}
               loading={audioState.loading}
               disabled={!onlineStatus}
-              onClick={() => handleAudio(card.lang[lang])}
+              onClick={() => handleAudio()}
             >
               <Icon icon="volumeFull" aria-hidden="true" size="1.5em" />
               <VisuallyHidden>Play audio</VisuallyHidden>

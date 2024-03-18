@@ -42,8 +42,12 @@
 }
 
 .example {
-  font-size: 80%;
+  font-size: 70%;
   color: var(--color-accent-6);
+}
+
+.example b {
+  font-weight: 400;
 }
 
 .level {
