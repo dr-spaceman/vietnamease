@@ -19,13 +19,7 @@ import {
 } from 'matterial'
 import React from 'react'
 
-import {
-  FLUENCY,
-  LANGUAGES,
-  LANGUAGE_MAP,
-  LEVELS,
-  PREFERENCES_DEFAULT,
-} from '@/const'
+import { LANGUAGES, LANGUAGE_MAP, LEVELS, PREFERENCES_DEFAULT } from '@/const'
 import useLocalStorage from '@/utils/use-local-storage-serialized'
 import FlashCard from './flash-card'
 import FlashCardsStart from './flash-cards-start'
@@ -240,6 +234,19 @@ function FlashCards(): JSX.Element {
               >
                 Hide session progress
               </MenuItemCheckbox>
+              <MenuItemCheckbox
+                name=""
+                hideOnClick={false}
+                checked={preferences.hideExamples}
+                onClick={() => {
+                  setPreferences({
+                    ...preferences,
+                    hideExamples: !preferences.hideExamples,
+                  })
+                }}
+              >
+                Hide examples
+              </MenuItemCheckbox>
               <MenuItem
                 hideOnClick={false}
                 style={{ display: 'flex', gap: '0.5em' }}
@@ -281,6 +288,7 @@ function FlashCards(): JSX.Element {
               register={register}
               progress={<Progress />}
               toggleLang={toggleLang}
+              showExamples={!preferences.hideExamples}
             />
           </CardsContext.Provider>
         ) : (

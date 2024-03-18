@@ -48,6 +48,7 @@ declare global {
     langLearn: LanguageKit
     showLang?: Language
     hideProgress?: boolean
+    hideExamples?: boolean
     includeMastered?: 'occasionally' | 'always' | 'never'
   }
 

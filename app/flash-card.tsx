@@ -60,12 +60,14 @@ function FlashCard({
   register,
   progress,
   toggleLang,
+  showExamples,
 }: {
   card: Card
   lang: Language
   register: Register
   progress: JSX.Element
   toggleLang: () => void
+  showExamples: boolean
 }): JSX.Element {
   // try {
   const [edit, setEdit] = React.useState(false)
@@ -162,11 +164,13 @@ function FlashCard({
             </Button>
           )}
         </div>
-        <div className={classes.example}>
-          {card.lang.examples
-            ? formatExample(card.lang.examples[0][lang])
-            : undefined}
-        </div>
+        {showExamples && (
+          <div className={classes.example}>
+            {card.lang.examples
+              ? formatExample(card.lang.examples[0][lang])
+              : undefined}
+          </div>
+        )}
         <small
           className={classes.level}
           style={
