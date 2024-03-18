@@ -21,8 +21,9 @@ import {
   setKeyboardInputActive,
 } from '@/utils/keyboard-input-active'
 import useAudio from '@/utils/use-audio'
-import delay from '@/utils/delay'
 import useOnlineStatus from '@/utils/use-online-status'
+
+const TARGET_LANG = LANGUAGES[1]
 
 function findLevel(level: number): Level {
   const foundLevel = LEVELS.sort((a, b) => b.level - a.level).find(
@@ -82,9 +83,9 @@ function FlashCard({
     // })
     // delay(5000).then(() => setAlert(null))
 
-    let transcribe = card.lang[lang]
+    let transcribe = card.lang[TARGET_LANG]
     if (card.lang.examples) {
-      transcribe = card.lang.examples[0][lang]
+      transcribe = card.lang.examples[0][TARGET_LANG]
     }
 
     playAudio(transcribe).catch(e => {
