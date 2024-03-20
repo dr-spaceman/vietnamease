@@ -1,0 +1,46 @@
+.chat {
+  display: flex;
+  flex-flow: column;
+  gap: 1em;
+}
+
+.message {
+  max-width: 90%;
+  background-color: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 0.5em 1em;
+}
+
+.botMessage {
+  align-self: flex-start;
+}
+
+.userMessage {
+  align-self: flex-end;
+}
+
+.optionMessage {
+  align-self: flex-end;
+  border-radius: 10em;
+  background-color: transparent;
+  border: 2px solid var(--color-secondary);
+  cursor: pointer;
+}
+
+.inputMessage {
+  align-self: flex-end;
+  width: 90%;
+  border: 2px solid var(--color-accent-3);
+  background-color: transparent;
+}
+
+.inputMessage input {
+  border-width: 0;
+  outline: none;
+  background-color: transparent;
+  width: 100%;
+}
+
+.inputMessage input:focus {
+  border-color: var(--color-accent-5);
+}

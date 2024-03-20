@@ -4,9 +4,9 @@ import NextLink from 'next/link'
 import { Inter } from 'next/font/google'
 import { cookies } from 'next/headers'
 
+import Footer from './footer'
 import { decryptSession } from '@/lib/session'
 import generatePageData from '@/utils/generate-page-data'
-import Header from './header'
 import './globals.css'
 
 const inter = Inter({
@@ -87,11 +87,11 @@ export default function RootLayout({
   return (
     <Html config={config} className={inter.className}>
       <Body>
-        <Header user={session?.user} />
         {cookies().has('loginError') && (
           <Alert severity="error">{cookies().get('loginError')?.value}</Alert>
         )}
-        {children}
+        <main>{children}</main>
+        <Footer />
       </Body>
     </Html>
   )

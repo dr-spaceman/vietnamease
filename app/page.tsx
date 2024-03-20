@@ -1,13 +1,21 @@
+'use client'
+
+import * as React from 'react'
+
+import ChatBot from './chat-bot'
+import useOnlineStatus from '@/utils/use-online-status'
 import FlashCards from './flash-cards'
-import Footer from './footer'
+import Header from './header'
 
 export default function HomePage() {
-  return (
+  const isOnline = useOnlineStatus()
+
+  return isOnline ? (
+    <ChatBot />
+  ) : (
     <>
-      <main>
-        <FlashCards />
-      </main>
-      <Footer />
+      <Header />
+      <FlashCards />
     </>
   )
 }
