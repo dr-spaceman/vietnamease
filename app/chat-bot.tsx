@@ -1,30 +1,59 @@
 import * as React from 'react'
+import { useChat } from 'ai/react'
 
 import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
 import classnames from '@/utils/classnames'
 
-type MessageType = 'bot' | 'user' | 'option' | 'input'
+type MessageType = 'bot' | 'user' | 'option'
 
-function ChatInput({
+function Chat({
   className,
-  children,
-}: React.HTMLAttributes<HTMLDivElement>): JSX.Element {
-  const ref = React.useRef<HTMLInputElement>(null)
+  ...props
+}: React.HTMLAttributes<HTMLFormElement>): JSX.Element {
+  const inputRef = React.useRef<HTMLTextAreaElement>(null)
+  const formRef = React.useRef<HTMLButtonElement>(null)
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat()
 
   React.useEffect(() => {
-    if (ref.current) {
-      ref.current.focus()
+    if (inputRef.current) {
+      inputRef.current.focus()
     }
   }, [])
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault() // Prevents the default action of inserting a new line
+      formRef.current?.click()
+    }
+  }
+
   return (
-    <form
-      /*action={handleInput}*/ className={className}
-      onClick={() => ref.current?.focus()}
-    >
-      <input ref={ref} type="text" placeholder={children as string} />
-    </form>
+    <>
+      {messages.map(m => (
+        <Message type={m.role === 'user' ? 'user' : 'bot'} key={m.id}>
+          {m.content}
+        </Message>
+      ))}
+      <form
+        {...props}
+        className={classnames(className, classes.message, classes.chatInput)}
+        onClick={() => inputRef.current?.focus()}
+        onSubmit={handleSubmit}
+      >
+        <textarea
+          ref={inputRef}
+          value={input}
+          placeholder="Type your message here"
+          onKeyDown={handleKeyDown}
+          onChange={handleInputChange}
+        />
+        <button ref={formRef} disabled={isLoading} type="submit">
+          Send
+        </button>
+      </form>
+    </>
   )
 }
 
@@ -43,10 +72,6 @@ function Message({
     )
   }
 
-  if (type === 'input') {
-    return <ChatInput className={classNames}>{children}</ChatInput>
-  }
-
   return <div className={classNames}>{children}</div>
 }
 
@@ -63,16 +88,19 @@ function ChatBot() {
     <div className={classes.chat}>
       <Message type="bot">Hello, I&apos;m your Vietnamese copilot.</Message>
       <Message type="bot">How can I help you today?</Message>
-      {option === '' ? (
+      {option === '' &&
         Object.keys(OPTIONS).map(key => (
           <Message key={key} type="option" onClick={() => setOption(key)}>
             {OPTIONS[key]}
           </Message>
-        ))
-      ) : (
+        ))}
+      {option === 'chat' && (
         <>
           <Message type="user">{OPTIONS[option]}</Message>
-          <Message type="input">Type your message here</Message>
+          <Message type="bot">
+            Xin chào! Có bạn cần trợ giúp gì không? <i>Hi, can I help you?</i>
+          </Message>
+          <Chat />
         </>
       )}
     </div>

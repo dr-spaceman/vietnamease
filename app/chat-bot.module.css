@@ -5,6 +5,7 @@
 }
 
 .message {
+  box-sizing: border-box;
   max-width: 90%;
   background-color: var(--color-surface);
   border-radius: var(--radius);
@@ -27,20 +28,25 @@
   cursor: pointer;
 }
 
-.inputMessage {
+.chatInput {
   align-self: flex-end;
-  width: 90%;
+  width: 100%;
+  max-width: 100%;
   border: 2px solid var(--color-accent-3);
   background-color: transparent;
 }
 
-.inputMessage input {
+.chatInput textarea {
+  width: 100%;
+  max-height: 25dvh;
+  margin: 0;
   border-width: 0;
   outline: none;
   background-color: transparent;
-  width: 100%;
+  resize: none;
+  appearance: none;
 }
 
-.inputMessage input:focus {
+.chatInput textarea:focus {
   border-color: var(--color-accent-5);
 }
