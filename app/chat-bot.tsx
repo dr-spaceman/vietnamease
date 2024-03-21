@@ -4,17 +4,22 @@ import { useChat } from 'ai/react'
 import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
 import classnames from '@/utils/classnames'
+import { CheckButton, CheckButtonGroup } from 'matterial'
+import FlashCards from './flash-cards'
 
 type MessageType = 'bot' | 'user' | 'option'
 
 function Chat({
+  active = true,
   className,
   ...props
-}: React.HTMLAttributes<HTMLFormElement>): JSX.Element {
+}: React.HTMLAttributes<HTMLFormElement> & {
+  active?: boolean
+}): JSX.Element {
+  const { messages, input, isLoading, handleInputChange, handleSubmit } =
+    useChat()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const formRef = React.useRef<HTMLButtonElement>(null)
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat()
 
   React.useEffect(() => {
     if (inputRef.current) {
@@ -36,23 +41,25 @@ function Chat({
           {m.content}
         </Message>
       ))}
-      <form
-        {...props}
-        className={classnames(className, classes.message, classes.chatInput)}
-        onClick={() => inputRef.current?.focus()}
-        onSubmit={handleSubmit}
-      >
-        <textarea
-          ref={inputRef}
-          value={input}
-          placeholder="Type your message here"
-          onKeyDown={handleKeyDown}
-          onChange={handleInputChange}
-        />
-        <button ref={formRef} disabled={isLoading} type="submit">
-          Send
-        </button>
-      </form>
+      {active && (
+        <form
+          {...props}
+          className={classnames(className, classes.message, classes.chatInput)}
+          onClick={() => inputRef.current?.focus()}
+          onSubmit={handleSubmit}
+        >
+          <textarea
+            ref={inputRef}
+            value={input}
+            placeholder="Type your message here"
+            onKeyDown={handleKeyDown}
+            onChange={handleInputChange}
+          />
+          <button ref={formRef} disabled={isLoading} type="submit">
+            Send
+          </button>
+        </form>
+      )}
     </>
   )
 }
@@ -81,26 +88,81 @@ const OPTIONS: Record<string, string> = {
   translate: 'Translate',
 }
 
+type ChatSection = (key: string | number, active?: boolean) => JSX.Element
+
 function ChatBot() {
-  const [option, setOption] = React.useState('')
+  const [option, setOption_] = React.useState('')
+  // stream of: message, chat thread, flash cards
+  const [messages, setMessages] = React.useState<ChatSection[]>([])
+
+  function addMessage(message: ChatSection) {
+    setMessages(m => [...m, message])
+  }
+
+  function setOption(optionKey: string) {
+    if (option === optionKey) {
+      return
+    }
+    setOption_(optionKey)
+    addMessage(key => (
+      <Message key={key} type="user">
+        {OPTIONS[optionKey]}
+      </Message>
+    ))
+    if (optionKey === 'chat') {
+      addMessage(key => (
+        <Message key={key} type="bot">
+          Xin chào! Có bạn cần trợ giúp gì không?{' '}
+          <i>
+            Ask me anything about Vietnamese words or grammar, or just chat.
+          </i>
+        </Message>
+      ))
+      addMessage((key, active) => <Chat key={key} active={active} />)
+    } else if (optionKey === 'translate') {
+      addMessage(key => (
+        <Message key={key} type="bot">
+          Sure, I provide a special translation function that helps you learn
+          words or phrases.
+        </Message>
+      ))
+      addMessage((key, active) => <Chat key={key} active={active} />)
+    } else if (optionKey === 'vocab') {
+      addMessage((key, active) => (active ? <FlashCards key={key} /> : <></>))
+    }
+  }
+
+  function OptionsMenu() {
+    return (
+      <CheckButtonGroup>
+        {Object.keys(OPTIONS).map(key => (
+          <CheckButton
+            key={key}
+            name={key}
+            checked={option === key}
+            onChange={() => setOption(key)}
+          >
+            {OPTIONS[key]}
+          </CheckButton>
+        ))}
+      </CheckButtonGroup>
+    )
+  }
 
   return (
     <div className={classes.chat}>
       <Message type="bot">Hello, I&apos;m your Vietnamese copilot.</Message>
       <Message type="bot">How can I help you today?</Message>
-      {option === '' &&
+      {messages.length === 0 ? (
         Object.keys(OPTIONS).map(key => (
           <Message key={key} type="option" onClick={() => setOption(key)}>
             {OPTIONS[key]}
           </Message>
-        ))}
-      {option === 'chat' && (
+        ))
+      ) : (
         <>
-          <Message type="user">{OPTIONS[option]}</Message>
-          <Message type="bot">
-            Xin chào! Có bạn cần trợ giúp gì không? <i>Hi, can I help you?</i>
-          </Message>
-          <Chat />
+          {messages.map((m, i) => m(i, i === messages.length - 1))}
+          <OptionsMenu />
         </>
       )}
     </div>
