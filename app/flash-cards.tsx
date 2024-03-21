@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Button,
   CheckButton,
@@ -29,6 +29,7 @@ import { addCards, deleteCard, getCards, saveCard, sortCards } from '@/db/cards'
 import CardsContext from '@/contexts/cards-context'
 import useCards from '@/utils/use-cards'
 import { setKeyboardInputActive } from '@/utils/keyboard-input-active'
+import { ChatMessage, ChatOption } from './chat-bot'
 
 const masteredLevel =
   LEVELS.find(level => level.description === 'mastered')?.level || 20
@@ -43,6 +44,7 @@ function FlashCards(): JSX.Element {
   let numMastered = React.useRef(0)
   const dialog = useDialog(false)
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const showCustomStart = searchParams.has('custom-start')
 
@@ -160,28 +162,16 @@ function FlashCards(): JSX.Element {
     }
 
     return (
-      <div>
-        <p>
-          <i>
-            <b>Chào bạn!</b>
-          </i>{' '}
-          Vietnamease app is your AI copilot in your Vietnamese language
-          learning journey 🧑‍✈️🚀 <i>Chúc may mắn!</i>
-        </p>
-        <Container row>
-          <Button variant="contained" color="secondary" onClick={quickStart}>
-            Quick Start
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            prepend={<Icon icon="settings" color="primary" />}
-            to="?custom-start"
-          >
-            Customized Start
-          </Button>
-        </Container>
-      </div>
+      <>
+        <ChatMessage type="bot">
+          It looks like you don&apos;t have any vocabulary sets yet. Let&apos;s
+          get you started.
+        </ChatMessage>
+        <ChatOption onClick={quickStart}>Quick Start</ChatOption>
+        <ChatOption onClick={() => router.push('?custom-start')}>
+          Customized Start
+        </ChatOption>
+      </>
     )
   }
 

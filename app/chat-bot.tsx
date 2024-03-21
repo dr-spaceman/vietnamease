@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { useChat } from 'ai/react'
+import { Button, Icon, SubmitRow, VisuallyHidden } from 'matterial'
 
 import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
 import classnames from '@/utils/classnames'
-import { CheckButton, CheckButtonGroup } from 'matterial'
 import FlashCards from './flash-cards'
 
-type MessageType = 'bot' | 'user' | 'option'
+type MessageType = 'bot' | 'user'
 
 function Chat({
   active = true,
@@ -37,9 +37,9 @@ function Chat({
   return (
     <>
       {messages.map(m => (
-        <Message type={m.role === 'user' ? 'user' : 'bot'} key={m.id}>
+        <ChatMessage type={m.role === 'user' ? 'user' : 'bot'} key={m.id}>
           {m.content}
-        </Message>
+        </ChatMessage>
       ))}
       {active && (
         <form
@@ -64,22 +64,28 @@ function Chat({
   )
 }
 
-function Message({
+function ChatMessage({
   type,
   children,
   onClick,
 }: { type: MessageType; onClick?: () => void } & RequiredChildren) {
   const classNames = classnames(classes.message, classes[`${type}Message`])
 
-  if (type === 'option') {
-    return (
-      <button className={classNames} onClick={onClick}>
-        {children}
-      </button>
-    )
-  }
-
   return <div className={classNames}>{children}</div>
+}
+
+function ChatOption({
+  children,
+  disabled = false,
+  onClick,
+}: { disabled?: boolean; onClick: () => void } & RequiredChildren) {
+  const classNames = classnames(classes.message, classes.chatOption)
+
+  return (
+    <button className={classNames} onClick={onClick} disabled={disabled}>
+      {children}
+    </button>
+  )
 }
 
 const OPTIONS: Record<string, string> = {
@@ -94,6 +100,7 @@ function ChatBot() {
   const [option, setOption_] = React.useState('')
   // stream of: message, chat thread, flash cards
   const [messages, setMessages] = React.useState<ChatSection[]>([])
+  const [optionMenuActive, setOptionMenuActive] = React.useState(false)
 
   function addMessage(message: ChatSection) {
     setMessages(m => [...m, message])
@@ -103,61 +110,80 @@ function ChatBot() {
     if (option === optionKey) {
       return
     }
+    setOptionMenuActive(false)
     setOption_(optionKey)
     addMessage(key => (
-      <Message key={key} type="user">
+      <ChatMessage key={key} type="user">
         {OPTIONS[optionKey]}
-      </Message>
+      </ChatMessage>
     ))
     if (optionKey === 'chat') {
       addMessage(key => (
-        <Message key={key} type="bot">
+        <ChatMessage key={key} type="bot">
           Xin chào! Có bạn cần trợ giúp gì không?{' '}
           <i>
             Ask me anything about Vietnamese words or grammar, or just chat.
           </i>
-        </Message>
+        </ChatMessage>
       ))
       addMessage((key, active) => <Chat key={key} active={active} />)
     } else if (optionKey === 'translate') {
       addMessage(key => (
-        <Message key={key} type="bot">
+        <ChatMessage key={key} type="bot">
           Sure, I provide a special translation function that helps you learn
           words or phrases.
-        </Message>
+        </ChatMessage>
       ))
       addMessage((key, active) => <Chat key={key} active={active} />)
     } else if (optionKey === 'vocab') {
-      addMessage((key, active) => (active ? <FlashCards key={key} /> : <></>))
+      addMessage((key, active) =>
+        active ? (
+          <FlashCards key={key} />
+        ) : (
+          <i key={key}>Flash Cards session complete</i>
+        )
+      )
     }
   }
 
   function OptionsMenu() {
+    if (!optionMenuActive) {
+      return (
+        <SubmitRow style={{ justifyContent: 'flex-end' }}>
+          <Button shape="circle" onClick={() => setOptionMenuActive(true)}>
+            <Icon icon="menu" aria-hidden="true" />
+            <VisuallyHidden>Open chat menu</VisuallyHidden>
+          </Button>
+        </SubmitRow>
+      )
+    }
+
     return (
-      <CheckButtonGroup>
+      <SubmitRow style={{ justifyContent: 'flex-end' }}>
         {Object.keys(OPTIONS).map(key => (
-          <CheckButton
+          <ChatOption
             key={key}
-            name={key}
-            checked={option === key}
-            onChange={() => setOption(key)}
+            disabled={option === key}
+            onClick={() => setOption(key)}
           >
             {OPTIONS[key]}
-          </CheckButton>
+          </ChatOption>
         ))}
-      </CheckButtonGroup>
+      </SubmitRow>
     )
   }
 
   return (
     <div className={classes.chat}>
-      <Message type="bot">Hello, I&apos;m your Vietnamese copilot.</Message>
-      <Message type="bot">How can I help you today?</Message>
+      <ChatMessage type="bot">
+        Hello, I&apos;m your Vietnamese copilot.
+      </ChatMessage>
+      <ChatMessage type="bot">How can I help you today?</ChatMessage>
       {messages.length === 0 ? (
         Object.keys(OPTIONS).map(key => (
-          <Message key={key} type="option" onClick={() => setOption(key)}>
+          <ChatOption key={key} onClick={() => setOption(key)}>
             {OPTIONS[key]}
-          </Message>
+          </ChatOption>
         ))
       ) : (
         <>
@@ -170,3 +196,4 @@ function ChatBot() {
 }
 
 export default ChatBot
+export { ChatOption, ChatMessage }

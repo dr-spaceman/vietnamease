@@ -20,12 +20,19 @@
   align-self: flex-end;
 }
 
-.optionMessage {
+.chatOption {
   align-self: flex-end;
   border-radius: 10em;
   background-color: transparent;
   border: 2px solid var(--color-secondary);
+  color: var(--color-secondary);
   cursor: pointer;
+}
+
+.chatOption[disabled] {
+  border-color: var(--color-accent-3);
+  color: var(--color-accent-3);
+  cursor: not-allowed;
 }
 
 .chatInput {
