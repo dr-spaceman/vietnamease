@@ -6,6 +6,7 @@ import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
 import classnames from '@/utils/classnames'
 import FlashCards from './flash-cards'
+import useOnlineStatus from '@/utils/use-online-status'
 
 type MessageType = 'bot' | 'user'
 
@@ -93,6 +94,7 @@ const OPTIONS: Record<string, string> = {
   vocab: 'Learn Vocab',
   translate: 'Translate',
 }
+const OFFLINE_OPTIONS = ['vocab']
 
 type ChatSection = (key: string | number, active?: boolean) => JSX.Element
 
@@ -101,6 +103,7 @@ function ChatBot() {
   // stream of: message, chat thread, flash cards
   const [messages, setMessages] = React.useState<ChatSection[]>([])
   const [optionMenuActive, setOptionMenuActive] = React.useState(false)
+  const isOnline = useOnlineStatus()
 
   function addMessage(message: ChatSection) {
     setMessages(m => [...m, message])
@@ -110,6 +113,7 @@ function ChatBot() {
     if (option === optionKey) {
       return
     }
+
     setOptionMenuActive(false)
     setOption_(optionKey)
     addMessage(key => (
@@ -117,6 +121,17 @@ function ChatBot() {
         {OPTIONS[optionKey]}
       </ChatMessage>
     ))
+
+    if (!isOnline && !OFFLINE_OPTIONS.includes(optionKey)) {
+      addMessage(key => (
+        <ChatMessage key={key} type="bot">
+          This option is not available offline.
+        </ChatMessage>
+      ))
+
+      return
+    }
+
     if (optionKey === 'chat') {
       addMessage(key => (
         <ChatMessage key={key} type="bot">
@@ -163,7 +178,9 @@ function ChatBot() {
         {Object.keys(OPTIONS).map(key => (
           <ChatOption
             key={key}
-            disabled={option === key}
+            disabled={
+              option === key || (!isOnline && !OFFLINE_OPTIONS.includes(key))
+            }
             onClick={() => setOption(key)}
           >
             {OPTIONS[key]}
