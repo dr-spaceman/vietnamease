@@ -6,9 +6,9 @@ import { init, Tiktoken } from 'tiktoken/lite/init'
 
 import getEnv from '@/utils/get-env'
 import { putUsage } from '@/lib/usage'
+import { getSession } from '@/lib/session'
 
 const GPT_MODEL = 'gpt-3.5-turbo'
-
 const apiKey = getEnv('OPENAI_KEY')
 const openai = new OpenAI({
   apiKey,
@@ -17,7 +17,24 @@ const openai = new OpenAI({
 export const runtime = 'edge'
 
 export async function POST(req: Request) {
-  const { messages } = await req.json()
+  const { messages: naturalMessages } = await req.json()
+  let messages = naturalMessages
+
+  // Inject assistant
+  if (messages.length === 1) {
+    messages.unshift({
+      role: 'system',
+      content:
+        'You are a Vietnamese (vi) language tutor. Chat with the user in vi and English (en), answering questions and offering advice on how to improve vi.',
+    })
+  }
+
+  // Inject user's first name into user messages
+  const session = getSession()
+  const firstName = session?.user?.name?.split(' ')[0]
+  if (firstName && messages.at(-1).role === 'user') {
+    messages.at(-1).name = firstName
+  }
 
   // Get input tokens
   const lastUserMessage = messages.at(-1).content
@@ -43,6 +60,12 @@ export async function POST(req: Request) {
     // console.log('usage', { input: inputTokens.length, output: tokens })
     const totalTokens = inputTokens.length + tokens
     putUsage({ tokens: totalTokens, meta: { model: GPT_MODEL } })
+
+    console.log('🤖 Chat completed', {
+      messages,
+      session,
+      usage: { input: inputTokens.length, output: tokens },
+    })
   }
   const stream = OpenAIStream(response, { onToken, onCompletion })
   const streamingResponse = new StreamingTextResponse(stream)
