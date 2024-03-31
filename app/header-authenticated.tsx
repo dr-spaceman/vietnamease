@@ -7,9 +7,9 @@ import { handleLogout } from './actions'
 function HeaderAuthenticated({ session }: { session: Session }) {
   return (
     <header className="page-header">
-      <h1>
+      {/* <h1>
         <Link href="/">Vietnamease</Link>
-      </h1>
+      </h1> */}
       <div>
         <Button
           onClick={async () => {

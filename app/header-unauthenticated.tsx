@@ -5,6 +5,7 @@ import {
   Button,
   Dialog,
   Form,
+  Link,
   SubmitRow,
   TextInput,
   useDialog,
@@ -30,6 +31,9 @@ function HeaderUnauthenticated({ session }: { session: Session }) {
 
   return (
     <header className="page-header">
+      {/* <h1>
+        <Link href="/">Vietnamease</Link>
+      </h1> */}
       <Button onClick={open}>Sign In</Button>
       <Dialog
         active={active}

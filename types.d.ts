@@ -97,5 +97,13 @@ declare global {
 
   type Usage = {
     tokens: number
+    meta: any
+  }
+
+  /**
+   * API Response data
+   */
+  type UsageResponse = {
+    tokens: number
   }
 }

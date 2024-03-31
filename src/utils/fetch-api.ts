@@ -1,4 +1,7 @@
+'use server'
+
 import getEnv from './get-env'
+import { getSession } from '@/lib/session'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
@@ -13,10 +16,12 @@ async function fetchApi<T>(
   } else {
     options = methodOrOptions
   }
+  const session = getSession()
   const apiUrl = getEnv('API_URL')
   const res = await fetch(`${apiUrl}/${url}`, {
     method,
     headers: {
+      ...(session ? { Authorization: `Bearer ${session.accessToken}` } : {}),
       'Content-Type': 'application/json',
       ...options?.headers,
     },
