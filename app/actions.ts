@@ -9,6 +9,7 @@ import {
 } from '@/db/translations'
 import delay from '@/utils/delay'
 import getEnv from '@/utils/get-env'
+import fetchApi from '@/utils/fetch-api'
 import extractJson from '@/utils/extract-json'
 import { login, logout } from '@/lib/session'
 
@@ -28,7 +29,7 @@ export type BuildCardsResponse =
   | ResponseFail
   | null
 export type LoginResponse =
-  | (ResponseSuccess & { data: LoginData })
+  | (ResponseSuccess & { data: SessionAuthenticated })
   | ResponseFail
   | null
 
@@ -185,26 +186,12 @@ async function handleLogin(
       )
     }
 
-    const apiUrl = getEnv('API_URL')
-    const loginRes = await fetch(
-      `${apiUrl}/${form.action === 'login' ? 'login' : 'users'}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      }
+    const data = await fetchApi<SessionAuthenticated>(
+      form.action === 'login' ? 'login' : 'users',
+      'POST',
+      { body: JSON.stringify(form) }
     )
 
-    if (!loginRes.ok) {
-      const errorData = await loginRes.json()
-      const errorMessage = errorData?.error?.message || 'Login failed'
-      console.error(errorData)
-      throw new Error(errorMessage)
-    }
-
-    const data = (await loginRes.json()) as LoginData
     login(data)
 
     return { success: true, data }
@@ -215,7 +202,9 @@ async function handleLogin(
 
 async function handleLogout(): Promise<Response> {
   try {
-    logout()
+    const data = await fetchApi<SessionUnauthenticated>('logout', 'POST')
+
+    logout(data)
 
     return { success: true }
   } catch (error: unknown) {

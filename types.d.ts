@@ -58,23 +58,44 @@ declare global {
     color: string
   }
 
-  type LoginData = { accessToken: string; user: User }
-
   /** User actions on a card */
   type Register = (action: 'increment' | 'decrement' | 'delete' | null) => void
 
+  type Role = 'guest' | 'user' | 'admin'
+
   type Session = {
-    accessToken?: string
-    loggedIn?: boolean
-    sessionId: string
-    user?: User
+    accessToken: string
+    user: SessionUser
+  }
+
+  type SessionAuthenticated = Session & { user: SessionUserAuthenticated }
+
+  type SessionUnauthenticated = Session & { user: SessionUserUnauthenticated }
+
+  type SessionUser = SessionUserAuthenticated | SessionUserUnauthenticated
+
+  type SessionUserAuthenticated = {
+    id: number
+    sessionId: User['sessionId']
+    isLoggedIn: true
+    name: string
+    email: string
+    role: Role
+  }
+
+  type SessionUserUnauthenticated = {
+    id: number
+    sessionId: User['sessionId']
+    isLoggedIn?: false
+    name?: never
+    email?: never
+    role: 'guest'
   }
 
   /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
   type Translation = { en: string; vi: string; examples?: LangPair[] }
 
-  type User = {
-    id: number
-    name: string
+  type Usage = {
+    tokens: number
   }
 }

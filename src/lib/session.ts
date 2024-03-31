@@ -1,5 +1,7 @@
+'use server'
+
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
+import fetchApi from '@/utils/fetch-api'
 
 type LoginSuccess = { success: true }
 type LoginFail = { success: false; error: string }
@@ -20,28 +22,19 @@ function decryptSession(session: string): Session {
   return JSON.parse(session)
 }
 
-function generateSessionId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8
-    return v.toString(16)
-  })
-}
-
 /**
  * Register an anonymous session (not logged in)
  */
-function newSession(response: NextResponse): LoginResponse {
-  try {
-    const encryptedSessionData = encryptSession({
-      sessionId: generateSessionId(),
-    })
-    response.cookies.set('session', encryptedSessionData, sessionCookieOptions)
-  } catch (error: unknown) {
-    return { success: false, error: String(error).replace('Error: ', '') }
+async function newSession(): Promise<void> {
+  const data = await fetchApi<SessionUnauthenticated>('session', 'POST')
+  const cookiesStore = cookies()
+  const encryptedSessionData = encryptSession(data)
+  cookiesStore.set('session', encryptedSessionData, sessionCookieOptions)
+  if (!cookiesStore.has('session')) {
+    throw new Error('Failed to set session cookie')
   }
 
-  return { success: true }
+  return
 }
 
 /**
@@ -49,22 +42,28 @@ function newSession(response: NextResponse): LoginResponse {
  *
  * @param loginData - The login data to store
  */
-function login(loginData: LoginData): void {
-  let session = getSession() || { sessionId: generateSessionId() }
-  session = {
-    ...session,
+function login(loginData: SessionAuthenticated): void {
+  let oldSession = getSession() as Session
+  if (!oldSession) {
+    // @TODO
+    console.error('No session found; Attempting to create a new session')
+  }
+  const session = {
+    ...oldSession,
     loggedIn: true,
     ...loginData,
   }
   const encryptedSessionData = encryptSession(session)
-  cookies().set('session', encryptedSessionData, sessionCookieOptions)
-  console.log('Session cookie', cookies().get('session')?.value)
+  const cookiesStore = cookies()
+  cookiesStore.set('session', encryptedSessionData, sessionCookieOptions)
+  console.log('Session cookie', cookiesStore.get('session')?.value)
 }
 
-function logout(): void {
-  let session = getSession() || { sessionId: generateSessionId() }
-  const newSession = { sessionId: session.sessionId }
-  const encryptedSessionData = encryptSession(newSession)
+/**
+ * Register a session as logged out
+ */
+function logout(loginData: SessionUnauthenticated): void {
+  const encryptedSessionData = encryptSession(loginData)
   cookies().set('session', encryptedSessionData, sessionCookieOptions)
 }
 
@@ -74,9 +73,12 @@ function isValidSession(session?: string | null | undefined) {
   }
 
   try {
-    const decryptedSessionData = JSON.parse(session)
-    if (!('sessionId' in decryptedSessionData)) {
-      throw new Error('Missing sessionId')
+    const { accessToken, user } = decryptSession(session)
+    if (!accessToken) {
+      throw new Error('Missing access token')
+    }
+    if (!user.sessionId) {
+      throw new Error('Missing session ID')
     }
 
     return true
@@ -89,7 +91,7 @@ function isValidSession(session?: string | null | undefined) {
 
 function getSession(): Session | null {
   const session = cookies().has('session')
-    ? (JSON.parse(cookies().get('session')?.value as string) as Session)
+    ? decryptSession(cookies().get('session')?.value as string)
     : null
 
   return session
@@ -99,7 +101,6 @@ export type { Session, LoginResponse }
 export {
   decryptSession,
   encryptSession,
-  generateSessionId,
   getSession,
   isValidSession,
   login,

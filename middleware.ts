@@ -15,21 +15,30 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  if (!isValidSession(request.cookies.get('session')?.value)) {
-    console.log('invalid session', request.cookies.get('session')?.value)
-    request.cookies.delete('session')
-    const loginResponse = newSession(response)
-    if (!loginResponse.success) {
-      response.cookies.set('loginError', loginResponse.error, {
-        httpOnly: true,
-        maxAge: 60,
-      })
-    }
-  }
+  const session = request.cookies.get('session')?.value
 
-  return response
+  if (!isValidSession(session)) {
+    console.log('invalid/empty session', session)
+    request.cookies.delete('session')
+    newSession()
+      .then(() => {
+        console.log('new session created')
+        return response
+      })
+      .catch(error => {
+        response.cookies.set('loginError', error, {
+          httpOnly: true,
+          maxAge: 60,
+        })
+      })
+  }
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    {
+      source: '/((?!api|_next/static|_next/image|favicon.ico|manifest.json).*)',
+      missing: [{ type: 'header', key: 'accept', value: '((?!text/html).*)' }],
+    },
+  ],
 }
