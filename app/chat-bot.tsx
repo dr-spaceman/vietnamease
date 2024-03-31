@@ -68,11 +68,20 @@ function Chat({
 function ChatMessage({
   type,
   children,
-  onClick,
-}: { type: MessageType; onClick?: () => void } & RequiredChildren) {
+}: { type: MessageType } & RequiredChildren) {
   const classNames = classnames(classes.message, classes[`${type}Message`])
 
-  return <div className={classNames}>{children}</div>
+  let message = children
+  if (typeof message === 'string') {
+    message = message.split('\n').map((m, i) => (
+      <React.Fragment key={i}>
+        {m}
+        <br />
+      </React.Fragment>
+    ))
+  }
+
+  return <div className={classNames}>{message}</div>
 }
 
 function ChatOption({
