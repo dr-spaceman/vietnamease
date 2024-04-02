@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useChat } from 'ai/react'
-import { Button, Icon, SubmitRow, VisuallyHidden } from 'matterial'
+import { Alert, Button, Icon, SubmitRow, VisuallyHidden } from 'matterial'
 
 import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
@@ -17,7 +17,7 @@ function Chat({
 }: React.HTMLAttributes<HTMLFormElement> & {
   active?: boolean
 }): JSX.Element {
-  const { messages, input, isLoading, handleInputChange, handleSubmit } =
+  const { messages, input, isLoading, handleInputChange, handleSubmit, error } =
     useChat()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const formRef = React.useRef<HTMLButtonElement>(null)
@@ -42,6 +42,9 @@ function Chat({
           {m.content}
         </ChatMessage>
       ))}
+      {error && (
+        <Alert severity="error">{error.message ?? String(error)}</Alert>
+      )}
       {active && (
         <form
           {...props}
