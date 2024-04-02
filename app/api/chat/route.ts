@@ -10,17 +10,24 @@ import { getSession } from '@/lib/session'
 import { NextResponse } from 'next/server'
 
 const GPT_MODEL = 'gpt-3.5-turbo'
+const MAX_MESSAGE_LENGTH = 250
+
 const apiKey = getEnv('OPENAI_KEY')
-const openai = new OpenAI({
-  apiKey,
-})
+const openai = new OpenAI({ apiKey })
 
 export const runtime = 'edge'
 
 export async function POST(req: Request) {
   try {
     const { messages: naturalMessages } = await req.json()
-    let messages = naturalMessages
+    let messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] =
+      naturalMessages
+
+    const lastMessage = messages.at(-1)
+
+    if (!lastMessage || messages.length < 1) {
+      throw new Error('No messages')
+    }
 
     // Inject assistant
     if (messages.length === 1) {
@@ -34,19 +41,26 @@ export async function POST(req: Request) {
     // Inject user's first name into user messages
     const session = getSession()
     const firstName = session?.user?.name?.split(' ')[0]
-    if (firstName && messages.at(-1).role === 'user') {
-      messages.at(-1).name = firstName
+    if (firstName && lastMessage?.role === 'user') {
+      lastMessage.name = firstName
+    }
+
+    // Check message length
+    if (
+      lastMessage.role === 'user' &&
+      lastMessage.content.length > MAX_MESSAGE_LENGTH
+    ) {
+      throw new Error(`Message exceeds maximum length of ${MAX_MESSAGE_LENGTH}`)
     }
 
     // Get input tokens
-    const lastUserMessage = messages.at(-1).content
     await init(imports => WebAssembly.instantiate(wasm, imports))
     const encoding = new Tiktoken(
       model.bpe_ranks,
       model.special_tokens,
       model.pat_str
     )
-    const inputTokens = encoding.encode(lastUserMessage)
+    const inputTokens = encoding.encode(lastMessage.content as string)
     encoding.free()
 
     const response = await openai.chat.completions.create({

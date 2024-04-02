@@ -10,6 +10,8 @@ import useOnlineStatus from '@/utils/use-online-status'
 
 type MessageType = 'bot' | 'user'
 
+const MAX_MESSAGE_LENGTH = 250
+
 function Chat({
   active = true,
   className,
@@ -56,6 +58,7 @@ function Chat({
             ref={inputRef}
             value={input}
             placeholder="Type your message here"
+            maxLength={MAX_MESSAGE_LENGTH}
             onKeyDown={handleKeyDown}
             onChange={handleInputChange}
           />
