@@ -15,6 +15,22 @@ const MAX_MESSAGE_LENGTH = 250
 const apiKey = getEnv('OPENAI_KEY')
 const openai = new OpenAI({ apiKey })
 
+function getFormattedFirstName(fullName?: string): string {
+  if (!fullName) {
+    return ''
+  }
+  let formattedString = fullName
+    .split(' ')[0]
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+  formattedString = formattedString.replace(/[^a-zA-Z0-9_-]/g, '')
+  if (formattedString.length > 64) {
+    formattedString = formattedString.substring(0, 64)
+  }
+
+  return formattedString
+}
+
 export const runtime = 'edge'
 
 export async function POST(req: Request) {
@@ -40,7 +56,7 @@ export async function POST(req: Request) {
 
     // Inject user's first name into user messages
     const session = getSession()
-    const firstName = session?.user?.name?.split(' ')[0]
+    const firstName = getFormattedFirstName(session?.user?.name)
     if (firstName && lastMessage?.role === 'user') {
       lastMessage.name = firstName
     }
