@@ -1,35 +1,16 @@
 import { OpenAIStream, StreamingTextResponse } from 'ai'
 import OpenAI from 'openai'
-import wasm from 'tiktoken/lite/tiktoken_bg.wasm?module'
-import model from 'tiktoken/encoders/cl100k_base.json'
-import { init, Tiktoken } from 'tiktoken/lite/init'
 
 import getEnv from '@/utils/get-env'
 import { putUsage } from '@/lib/usage'
 import { getSession } from '@/lib/session'
-import { NextResponse } from 'next/server'
+import { getFormattedFirstName, handleError } from '@/lib/chat-bot'
 
 const GPT_MODEL = 'gpt-3.5-turbo'
 const MAX_MESSAGE_LENGTH = 250
 
 const apiKey = getEnv('OPENAI_KEY')
 const openai = new OpenAI({ apiKey })
-
-function getFormattedFirstName(fullName?: string): string {
-  if (!fullName) {
-    return ''
-  }
-  let formattedString = fullName
-    .split(' ')[0]
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-  formattedString = formattedString.replace(/[^a-zA-Z0-9_-]/g, '')
-  if (formattedString.length > 64) {
-    formattedString = formattedString.substring(0, 64)
-  }
-
-  return formattedString
-}
 
 export const runtime = 'edge'
 
@@ -55,8 +36,7 @@ export async function POST(req: Request) {
     }
 
     // Inject user's first name into user messages
-    const session = getSession()
-    const firstName = getFormattedFirstName(session?.user?.name)
+    const firstName = getFormattedFirstName(getSession()?.user?.name)
     if (firstName && lastMessage?.role === 'user') {
       lastMessage.name = firstName
     }
@@ -69,15 +49,7 @@ export async function POST(req: Request) {
       throw new Error(`Message exceeds maximum length of ${MAX_MESSAGE_LENGTH}`)
     }
 
-    // Get input tokens
-    await init(imports => WebAssembly.instantiate(wasm, imports))
-    const encoding = new Tiktoken(
-      model.bpe_ranks,
-      model.special_tokens,
-      model.pat_str
-    )
-    const inputTokens = encoding.encode(lastMessage.content as string)
-    encoding.free()
+    const inputTokens = lastMessage.content as string
 
     const response = await openai.chat.completions.create({
       model: GPT_MODEL,
@@ -98,7 +70,6 @@ export async function POST(req: Request) {
         console.log('🤖 Chat completed', {
           completion,
           messages,
-          session,
           usage: { input: inputTokens.length, output: tokens },
         })
       },
@@ -107,20 +78,6 @@ export async function POST(req: Request) {
 
     return streamingResponse
   } catch (error) {
-    console.error(error)
-    if (error instanceof OpenAI.APIError) {
-      const { status, message } = error
-      if (
-        status?.toString().startsWith('4') ||
-        status === 500 ||
-        status === 503
-      ) {
-        return NextResponse.json(message, { status })
-      } else {
-        return NextResponse.json('Something went wrong :(', { status })
-      }
-    } else {
-      return NextResponse.json(String(error), { status: 500 })
-    }
+    handleError(error)
   }
 }
