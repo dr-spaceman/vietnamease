@@ -48,7 +48,11 @@ function HeaderUnauthenticated({ session }: { session: Session }) {
             name="action"
             value={state === 'signin' ? 'login' : 'register'}
           />
-          <input type="hidden" name="sessionId" value={session.sessionId} />
+          <input
+            type="hidden"
+            name="sessionId"
+            value={session.user.sessionId}
+          />
           <TextInput type="email" name="email" placeholder="Email" required />
           {state === 'signup' && (
             <TextInput name="name" placeholder="Name" required />
