@@ -5,10 +5,12 @@ import getEnv from '@/utils/get-env'
 import { getSession } from '@/lib/session'
 import { MAX_LEN_TRANSLATION } from '@/const'
 
-let instances: Record<Session['sessionId'], OpenAI> = {}
+let instances: Record<Session['user']['sessionId'], OpenAI> = {}
 // TODO: store threadIds in a database
-let threadIds: Record<Session['sessionId'], OpenAI.Beta.Threads.Thread['id']> =
-  {}
+let threadIds: Record<
+  Session['user']['sessionId'],
+  OpenAI.Beta.Threads.Thread['id']
+> = {}
 
 // const translateFunction: OpenAI.Chat.ChatCompletionCreateParams.Function = {
 //   description: 'translate Vietnamese and English words',
@@ -30,7 +32,7 @@ let threadIds: Record<Session['sessionId'], OpenAI.Beta.Threads.Thread['id']> =
 // }
 
 const getOpenAi = () => {
-  const sessionId = getSession()?.sessionId || 'no-session'
+  const sessionId = getSession()?.user.sessionId || 'no-session'
 
   if (!(sessionId in instances)) {
     console.log('creating new instance of openai', sessionId)
@@ -42,7 +44,7 @@ const getOpenAi = () => {
 }
 
 async function createChat() {
-  const sessionId = getSession()?.sessionId || 'no-session'
+  const sessionId = getSession()?.user.sessionId || 'no-session'
   const openai = getOpenAi()
 
   const assistant = await openai.beta.assistants.retrieve(
