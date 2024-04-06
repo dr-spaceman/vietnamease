@@ -28,9 +28,12 @@ declare global {
 
   type Language = (typeof LANGUAGES)[number]
 
+  /**
+   * User preferences
+   */
   type LanguageKit = {
     /** The IANA language tag, eg 'en', without the country tag */
-    lang: Language
+    lang: string
 
     /** The IANA country tag, eg 'US' */
     country?: string
