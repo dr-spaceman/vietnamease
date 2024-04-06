@@ -1,0 +1,25 @@
+{
+  "name": "translateEnToVi",
+  "description": "translate English to Vietnamese",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "translation": {
+        "type": "string",
+        "description": "translation of input to Vietnamese"
+      },
+      "phrases": {
+        "type": "array",
+        "description": "'translation' Vietnamese divided into individual words and phrases",
+        "items": {
+          "type": "array",
+          "description": "tuple in the form of ['vi', 'en']: Vietnamese, English translation",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required": ["translation", "phrases"]
+  }
+}

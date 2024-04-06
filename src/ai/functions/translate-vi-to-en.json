@@ -1,0 +1,29 @@
+{
+  "name": "translateViToEn",
+  "description": "translate Vietnamese to English",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "original": {
+        "type": "string",
+        "description": "original input in Vietnamese telex"
+      },
+      "translation": {
+        "type": "string",
+        "description": "translation of input to English"
+      },
+      "phrases": {
+        "type": "array",
+        "description": "'original' Vietnamese divided into individual words and phrases",
+        "items": {
+          "type": "array",
+          "description": "tuple in the form of ['vi', 'en']: Vietnamese, English translation",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required": ["original", "translation", "phrases"]
+  }
+}

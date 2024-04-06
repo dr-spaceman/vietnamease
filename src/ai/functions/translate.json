@@ -1,0 +1,30 @@
+{
+  "name": "translate",
+  "description": "translate Vietnamese and English words",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "inputLanguage": {
+        "type": "string",
+        "enum": ["vi", "en"],
+        "description": "user input language"
+      },
+      "enTranslation": {
+        "type": "string",
+        "description": "translation of input in English; Only required if inputLanguage is 'vi'"
+      },
+      "phrases": {
+        "type": "array",
+        "description": "tuples of individual words and phrases",
+        "items": {
+          "type": "array",
+          "description": "tuple of [vi, en] words and phrases, in the order of the whole VI version",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required": ["inputLanguage", "phrases"]
+  }
+}
