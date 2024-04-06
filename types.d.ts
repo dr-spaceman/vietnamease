@@ -95,6 +95,13 @@ declare global {
   /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
   type Translation = { en: string; vi: string; examples?: LangPair[] }
 
+  /** JSON Dict produced by translation assistant */
+  type TranslationDict = {
+    inputLang: 'en' | 'vi'
+    translation: string
+    phrases: [string, string][]
+  }
+
   type Usage = {
     tokens: number
     meta: any

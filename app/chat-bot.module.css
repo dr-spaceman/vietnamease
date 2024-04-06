@@ -20,6 +20,18 @@
   align-self: flex-end;
 }
 
+.translateMessage {
+  align-self: flex-start;
+}
+
+.translateMessage a {
+  text-decoration: underline;
+}
+
+.translateMessage div[lang='en'] {
+  margin: 0.5em 0 0;
+}
+
 .chatOption {
   align-self: flex-end;
   border-radius: 10em;

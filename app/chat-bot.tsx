@@ -1,26 +1,60 @@
 import * as React from 'react'
 import { useChat } from 'ai/react'
-import { Alert, Button, Icon, SubmitRow, VisuallyHidden } from 'matterial'
+import {
+  Alert,
+  Button,
+  Icon,
+  SubmitRow,
+  TooltipProvider,
+  TooltipAnchor,
+  Tooltip,
+  VisuallyHidden,
+} from 'matterial'
 
 import { RequiredChildren } from '@/interfaces/children'
 import classes from './chat-bot.module.css'
 import classnames from '@/utils/classnames'
 import FlashCards from './flash-cards'
 import useOnlineStatus from '@/utils/use-online-status'
+import extractJson from '@/utils/extract-json'
 
-type MessageType = 'bot' | 'user'
+type MessageType = 'bot' | 'user' | 'translate'
 
 const MAX_MESSAGE_LENGTH = 250
+
+function parseMessage(content: string): JSX.Element {
+  const data: TranslationDict = extractJson(content)
+
+  const Phrases = () =>
+    data.phrases.map(([vi, en], index) => (
+      <React.Fragment key={en + String(index)}>
+        <TooltipProvider>
+          <TooltipAnchor render={<a lang="vi">{vi}</a>} lang="vi" />
+          <Tooltip lang="en">{en}</Tooltip>
+        </TooltipProvider>
+        {'\u00A0'}
+      </React.Fragment>
+    ))
+
+  return (
+    <>
+      <Phrases />
+      {data.inputLang === 'vi' && <div lang="en">{data.translation}</div>}
+    </>
+  )
+}
 
 function Chat({
   active = true,
   className,
+  mode = 'chat',
   ...props
 }: React.HTMLAttributes<HTMLFormElement> & {
   active?: boolean
+  mode?: 'chat' | 'translate'
 }): JSX.Element {
   const { messages, input, isLoading, handleInputChange, handleSubmit, error } =
-    useChat()
+    useChat({ api: `api/${mode}` })
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const formRef = React.useRef<HTMLButtonElement>(null)
 
@@ -40,10 +74,22 @@ function Chat({
   return (
     <>
       {messages.map(m => (
-        <ChatMessage type={m.role === 'user' ? 'user' : 'bot'} key={m.id}>
-          {m.content}
+        <ChatMessage
+          type={
+            m.role === 'user'
+              ? 'user'
+              : mode === 'translate'
+              ? 'translate'
+              : 'bot'
+          }
+          key={m.id}
+        >
+          {mode === 'translate' && m.role === 'assistant'
+            ? parseMessage(m.content)
+            : m.content}
         </ChatMessage>
       ))}
+      {isLoading && <>Loading...</>}
       {error && (
         <Alert severity="error">{error.message ?? String(error)}</Alert>
       )}
@@ -164,7 +210,9 @@ function ChatBot() {
           words or phrases.
         </ChatMessage>
       ))
-      addMessage((key, active) => <Chat key={key} active={active} />)
+      addMessage((key, active) => (
+        <Chat key={key} mode="translate" active={active} />
+      ))
     } else if (optionKey === 'vocab') {
       addMessage((key, active) =>
         active ? (
