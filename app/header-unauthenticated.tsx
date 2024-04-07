@@ -53,14 +53,26 @@ function HeaderUnauthenticated({ session }: { session: Session }) {
             name="sessionId"
             value={session.user.sessionId}
           />
-          <TextInput type="email" name="email" placeholder="Email" required />
+          <TextInput
+            type="email"
+            name="email"
+            placeholder="Email"
+            autoComplete="email"
+            required
+          />
           {state === 'signup' && (
-            <TextInput name="name" placeholder="Name" required />
+            <TextInput
+              name="name"
+              placeholder="Name"
+              auto-complete="full-name"
+              required
+            />
           )}
           <TextInput
             type="password"
             name="password"
             placeholder="Password"
+            autoComplete="off"
             required
           />
           <SubmitRow style={{ justifyContent: 'flex-end' }}>
