@@ -12,7 +12,7 @@ import {
 } from 'matterial'
 import { useFormState, useFormStatus } from 'react-dom'
 
-import { handleLogin } from './actions'
+import { handleLogin } from '../actions'
 
 function HeaderUnauthenticated({ session }: { session: Session }) {
   const { pending } = useFormStatus()

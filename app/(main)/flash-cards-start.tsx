@@ -17,7 +17,7 @@ import { FLUENCY, MAX_LEN_CUSTOM_LIST, PREFERENCES_DEFAULT } from '@/const'
 import { capitalize } from '@/utils/string'
 import useLang from '@/utils/use-lang'
 import { addCards } from '@/db/cards'
-import { type StartPreferences, buildCards } from './actions'
+import { type StartPreferences, buildCards } from '../actions'
 import { SubmitButton } from '@/components/submit-button'
 import CardsContext from '@/contexts/cards-context'
 

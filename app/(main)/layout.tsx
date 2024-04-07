@@ -10,7 +10,8 @@ import { decryptSession } from '@/lib/session'
 import generatePageData from '@/utils/generate-page-data'
 import HeaderAuthenticated from './header-authenticated'
 import HeaderUnauthenticated from './header-unauthenticated'
-import './globals.css'
+import '../global.css'
+import './main.css'
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],

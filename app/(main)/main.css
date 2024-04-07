@@ -1,8 +1,4 @@
 :root {
-  --color-secondary: #1acde5;
-  --color-secondary-hover: #59e3f6;
-  --color-primary: #f36458;
-  --color-primary-hover: #f68b82;
   --layout-h-spacing: var(--space-small);
   --layout-v-spacing: var(--space-small);
   --layout-max-width: 640px;
@@ -16,11 +12,6 @@
     --layout-v-spacing: var(--space-medium);
   }
 }
-
-/* Better contrast with cyan */
-/* button.color--secondary {
-  color: rgb(57, 57, 57);
-} */
 
 body {
   margin: 0;

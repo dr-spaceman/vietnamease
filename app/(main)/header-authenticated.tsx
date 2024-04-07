@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { Button, Link } from 'matterial'
-import { handleLogout } from './actions'
+import { handleLogout } from '../actions'
 
 function HeaderAuthenticated({ session }: { session: Session }) {
   return (
