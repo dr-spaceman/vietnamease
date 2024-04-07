@@ -95,6 +95,8 @@ declare global {
     role: 'guest'
   }
 
+  type SessionEncrypted = string
+
   /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
   type Translation = { en: string; vi: string; examples?: LangPair[] }
 

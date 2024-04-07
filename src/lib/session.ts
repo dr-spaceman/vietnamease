@@ -14,18 +14,18 @@ const sessionCookieOptions = {
   path: '/',
 }
 
-function encryptSession(data: Session): string {
+function encryptSession(data: Session): SessionEncrypted {
   return JSON.stringify(data)
 }
 
-function decryptSession(session: string): Session {
+function decryptSession(session: SessionEncrypted): Session {
   return JSON.parse(session)
 }
 
 /**
  * Register an anonymous session (not logged in)
  */
-async function newSession(): Promise<void> {
+async function newSession(): Promise<SessionEncrypted> {
   const data = await fetchApi<SessionUnauthenticated>('session', 'POST')
   const cookiesStore = cookies()
   const encryptedSessionData = encryptSession(data)
@@ -34,7 +34,7 @@ async function newSession(): Promise<void> {
     throw new Error('Failed to set session cookie')
   }
 
-  return
+  return encryptedSessionData
 }
 
 /**
@@ -67,7 +67,7 @@ function logout(loginData: SessionUnauthenticated): void {
   cookies().set('session', encryptedSessionData, sessionCookieOptions)
 }
 
-function isValidSession(session?: string | null | undefined) {
+function isValidSession(session?: SessionEncrypted | null | undefined) {
   if (!session) {
     return false
   }

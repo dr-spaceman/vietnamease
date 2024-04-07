@@ -1,9 +1,17 @@
-import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
+import { NextFetchEvent, NextRequest, NextResponse } from 'next/server'
+import { Ratelimit } from '@upstash/ratelimit'
+import { kv } from '@vercel/kv'
 
-import { isValidSession, newSession } from './src/lib/session'
+import { getSession, isValidSession, newSession } from './src/lib/session'
 
-export function middleware(request: NextRequest) {
+const ratelimit = new Ratelimit({
+  redis: kv,
+  // 5 requests from the same IP in 10 seconds
+  limiter: Ratelimit.slidingWindow(5, '10 s'),
+  prefix: 'ratelimit_middleware',
+})
+
+export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const response = NextResponse.next()
 
   if (request.cookies.has('loginError')) {
@@ -15,23 +23,39 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  const session = request.cookies.get('session')?.value
+  let session: SessionEncrypted | undefined =
+    request.cookies.get('session')?.value
 
   if (!isValidSession(session)) {
-    console.log('invalid/empty session', session)
+    // console.log('invalid/empty session', session)
     request.cookies.delete('session')
-    newSession()
-      .then(() => {
-        console.log('new session created')
-        return response
+    try {
+      session = await newSession()
+      console.log('new session created')
+    } catch (error) {
+      response.cookies.set('loginError', String(error), {
+        httpOnly: true,
+        maxAge: 60,
       })
-      .catch(error => {
-        response.cookies.set('loginError', error, {
-          httpOnly: true,
-          maxAge: 60,
-        })
-      })
+    }
   }
+
+  const ip = request.ip ?? '127.0.0.1'
+  const sessionData = getSession()
+  const { success, pending, limit, reset, remaining } = await ratelimit.limit(
+    sessionData?.user.id.toString() ?? ip
+  )
+  event.waitUntil(pending)
+
+  const res = success
+    ? NextResponse.next()
+    : NextResponse.redirect(new URL('/api/blocked', request.url))
+
+  res.headers.set('X-RateLimit-Limit', limit.toString())
+  res.headers.set('X-RateLimit-Remaining', remaining.toString())
+  res.headers.set('X-RateLimit-Reset', reset.toString())
+
+  return res
 }
 
 export const config = {
