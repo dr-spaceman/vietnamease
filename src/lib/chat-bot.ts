@@ -1,21 +1,21 @@
-import wasm from 'tiktoken/lite/tiktoken_bg.wasm?module'
-import model from 'tiktoken/encoders/cl100k_base.json'
-import { init, Tiktoken } from 'tiktoken/lite/init'
+// import wasm from 'tiktoken/lite/tiktoken_bg.wasm?module'
+// import model from 'tiktoken/encoders/cl100k_base.json'
+// import { init, Tiktoken } from 'tiktoken/lite/init'
 import OpenAI from 'openai'
 import { NextResponse } from 'next/server'
 
-async function calculateTokens(messageContent: string): Promise<number> {
-  await init(imports => WebAssembly.instantiate(wasm, imports))
-  const encoding = new Tiktoken(
-    model.bpe_ranks,
-    model.special_tokens,
-    model.pat_str
-  )
-  const tokens = encoding.encode(messageContent).length
-  encoding.free()
+// async function calculateTokens(messageContent: string): Promise<number> {
+//   await init(imports => WebAssembly.instantiate(wasm, imports))
+//   const encoding = new Tiktoken(
+//     model.bpe_ranks,
+//     model.special_tokens,
+//     model.pat_str
+//   )
+//   const tokens = encoding.encode(messageContent).length
+//   encoding.free()
 
-  return tokens
-}
+//   return tokens
+// }
 
 function getFormattedFirstName(fullName?: string): string {
   if (!fullName) {
@@ -52,4 +52,4 @@ function handleError(error: unknown) {
   return NextResponse.json(String(error), { status: 500 })
 }
 
-export { calculateTokens, getFormattedFirstName, handleError }
+export { /*calculateTokens,*/ getFormattedFirstName, handleError }

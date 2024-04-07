@@ -65,7 +65,6 @@ export async function POST(req: Request) {
 
       const fn = response.choices.at(0)?.message.content
       if (!fn) {
-        console.error(response)
         throw new Error('Error parsing function_call')
       }
       const data: TranslationDict = extractJson(fn)
@@ -79,29 +78,9 @@ export async function POST(req: Request) {
       return NextResponse.json(data)
     } catch (error) {
       console.error(error)
+      console.error(response)
       throw new Error('There was an error parsing the chat response')
     }
-
-    // let tokens = 0
-    // const stream = OpenAIStream(response, {
-    //   onToken: async token => {
-    //     tokens++
-    //   },
-    //   onCompletion: async completion => {
-    //     // console.log('usage', { input: inputTokens.length, output: tokens })
-    //     const totalTokens = inputTokens.length + tokens
-    //     putUsage({ tokens: totalTokens, meta: { model: GPT_MODEL } })
-
-    //     console.log('🤖 Chat completed', {
-    //       completion,
-    //       messages,
-    //       usage: { input: inputTokens.length, output: tokens },
-    //     })
-    //   },
-    // })
-    // const streamingResponse = new StreamingTextResponse(stream)
-
-    // return streamingResponse
   } catch (error) {
     console.error(error)
 
