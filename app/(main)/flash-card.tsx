@@ -1,8 +1,8 @@
 'use client'
 
 import {
-  Alert,
   Button,
+  Dialog,
   Icon,
   Menu,
   MenuButton,
@@ -10,6 +10,7 @@ import {
   MenuProvider,
   VisuallyHidden,
   useAlert,
+  useDialog,
 } from 'matterial'
 import * as React from 'react'
 
@@ -71,10 +72,10 @@ function FlashCard({
   showExamples: boolean
 }): JSX.Element {
   // try {
-  const [edit, setEdit] = React.useState(false)
   const { playAudio, audioState } = useAudio()
   const [Alert, setAlert] = useAlert()
   const onlineStatus = useOnlineStatus()
+  const dialog = useDialog(false)
 
   const handleAudio = () => {
     // setAlert({
@@ -85,7 +86,7 @@ function FlashCard({
 
     let transcribe = card.lang[TARGET_LANG]
     if (card.lang.examples) {
-      transcribe = card.lang.examples[0][TARGET_LANG]
+      transcribe = card.lang.examples[0][TARGET_LANG].replace(/__/g, '')
     }
 
     playAudio(transcribe).catch(e => {
@@ -103,7 +104,11 @@ function FlashCard({
   const timerRef = React.useRef<null | number>(null)
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (edit || !isKeyboardInputActive() || !initialPressRef.current) {
+      if (
+        dialog.active ||
+        !isKeyboardInputActive() ||
+        !initialPressRef.current
+      ) {
         return
       }
       initialPressRef.current = false
@@ -139,13 +144,9 @@ function FlashCard({
       document.removeEventListener('keyup', handleKeyUp)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card.lang, edit, lang, register, toggleLang])
+  }, [card.lang, dialog.active, lang, register, toggleLang])
 
   const thisLevel = findLevel(card.level)
-
-  if (edit) {
-    return <FlashCardEdit card={card} onFinish={() => setEdit(false)} />
-  }
 
   return (
     <>
@@ -190,7 +191,7 @@ function FlashCard({
             <VisuallyHidden>Card Menu</VisuallyHidden>
           </MenuButton>
           <Menu>
-            <MenuItem onClick={() => setEdit(true)}>Edit</MenuItem>
+            <MenuItem onClick={dialog.open}>Edit</MenuItem>
             <MenuItem
               onClick={() => register('delete')}
               style={{ color: 'var(--color-error)' }}
@@ -228,6 +229,10 @@ function FlashCard({
             :(
           </Button>
         </Container> */}
+
+      <Dialog active={dialog.active} onDismiss={dialog.close} title="Edit Card">
+        <FlashCardEdit card={card} onFinish={dialog.close} />
+      </Dialog>
     </>
   )
   // } catch (e) {

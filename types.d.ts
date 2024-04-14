@@ -98,7 +98,11 @@ declare global {
   type SessionEncrypted = string
 
   /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
-  type Translation = { en: string; vi: string; examples?: LangPair[] }
+  type Translation = {
+    en: string
+    vi: string
+    examples?: Array<{ en: string; vi: string }>
+  }
 
   /** JSON Dict produced by translation assistant */
   type TranslationDict = {
