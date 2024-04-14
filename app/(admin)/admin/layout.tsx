@@ -1,4 +1,4 @@
-import { Html, Body, PageNav } from 'matterial'
+import { Html, Body, PageNav, NavMap } from 'matterial'
 import type { Metadata } from 'next'
 import NextLink from 'next/link'
 import { Inter } from 'next/font/google'
@@ -45,7 +45,7 @@ const navMap: NavMap = {
     { href: '/admin/', title: 'Main' },
     { href: '/admin/usage', title: 'Usage' },
   ],
-  __: [{ href: '/', title: <>{'\u2190'} Vietnamease</> }],
+  __: [{ href: '/', title: '← Vietnamease' }],
 }
 
 function SiteNav(): JSX.Element {
