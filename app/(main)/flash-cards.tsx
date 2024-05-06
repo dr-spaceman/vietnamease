@@ -261,7 +261,7 @@ function FlashCards(): JSX.Element {
               </MenuItem>
               <MenuItem
                 render={
-                  <Link href="/add-card" unstyled>
+                  <Link href="/learn" unstyled>
                     Add a Card
                   </Link>
                 }
