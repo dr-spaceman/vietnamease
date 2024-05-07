@@ -6,8 +6,8 @@ import { NextResponse } from 'next/server'
 import extractJson from '@/utils/extract-json'
 import { putUsage } from '@/lib/usage'
 
-const GPT_MODEL = 'gpt-3.5-turbo-0125'
-// const GPT_MODEL = 'gpt-4-turbo-preview'
+// const GPT_MODEL = 'gpt-3.5-turbo-0125'
+const GPT_MODEL = 'gpt-4-turbo-preview'
 const MAX_MESSAGE_LENGTH = 150
 
 const apiKey = getEnv('OPENAI_KEY')
