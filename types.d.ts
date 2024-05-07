@@ -28,6 +28,11 @@ declare global {
 
   type Language = (typeof LANGUAGES)[number]
 
+  type LanguageDict = {
+    en: string
+    vi: string
+  }
+
   /**
    * User preferences
    */
@@ -98,10 +103,8 @@ declare global {
   type SessionEncrypted = string
 
   /** @example { en: 'beautiful', vi: 'đẹp', examples: [{ en: '', vi: '' }] } */
-  type Translation = {
-    en: string
-    vi: string
-    examples?: Array<{ en: string; vi: string }>
+  type Translation = LanguageDict & {
+    examples?: Array<LanguageDict>
   }
 
   /** JSON Dict produced by translation assistant */

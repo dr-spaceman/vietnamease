@@ -39,20 +39,6 @@ body {
   position: relative;
 }
 
-.page-header > *:last-child {
-  margin-left: auto;
-}
-
-@media screen and (min-width: 640px) {
-  .page-header {
-    margin-bottom: var(--space-large);
-  }
-
-  .page-footer {
-    margin-top: var(--space-large);
-  }
-}
-
 .page-header h1 {
   margin: 0;
   padding: 0;
@@ -62,7 +48,7 @@ body {
   flex-basis: 100%;
 }
 
-@media screen and (min-width: 640px) {
+/* @media screen and (min-width: 640px) {
   .page-header h1 {
     flex-basis: auto;
   }
@@ -72,6 +58,22 @@ body {
   .page-header h1 {
     position: absolute;
     left: -8.5rem;
+  }
+} */
+
+.page-header button,
+.page-header a {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+@media screen and (min-width: 640px) {
+  .page-header {
+    margin-bottom: var(--space-large);
+  }
+
+  .page-footer {
+    margin-top: var(--space-large);
   }
 }
 

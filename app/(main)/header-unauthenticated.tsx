@@ -31,9 +31,10 @@ function HeaderUnauthenticated({ session }: { session: Session }) {
 
   return (
     <header className="page-header">
-      {/* <h1>
+      <h1 style={{ visibility: 'hidden' }}>
         <Link href="/">Vietnamease</Link>
-      </h1> */}
+      </h1>
+      <a href="/learn">New Learn</a>
       <Button onClick={open}>Sign In</Button>
       <Dialog
         active={active}
