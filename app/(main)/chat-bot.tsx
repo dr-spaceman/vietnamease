@@ -22,6 +22,12 @@ type MessageType = 'bot' | 'user' | 'translate'
 
 const MAX_MESSAGE_LENGTH = 250
 
+function learnUrl(learn: string) {
+  const sp = new URLSearchParams({ learn })
+
+  return `/learn?${sp.toString()}`
+}
+
 function parseMessage(content: string): JSX.Element {
   const data: TranslationDict = extractJson(content)
 
@@ -29,7 +35,14 @@ function parseMessage(content: string): JSX.Element {
     data.phrases.map(([vi, en], index) => (
       <React.Fragment key={en + String(index)}>
         <TooltipProvider>
-          <TooltipAnchor render={<a lang="vi">{vi}</a>} lang="vi" />
+          <TooltipAnchor
+            render={
+              <a lang="vi" href={learnUrl(vi)}>
+                {vi}
+              </a>
+            }
+            lang="vi"
+          />
           <Tooltip lang="en">{en}</Tooltip>
         </TooltipProvider>
         {'\u00A0'}

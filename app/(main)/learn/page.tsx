@@ -108,6 +108,7 @@ function NewLearn() {
             <Button type="submit" variant="contained" color="secondary">
               Generate Card
             </Button>
+            <Button onClick={handleCancel}>Cancel</Button>
           </SubmitRow>
         </Form>
       </main>
