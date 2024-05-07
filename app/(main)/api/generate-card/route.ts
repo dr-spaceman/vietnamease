@@ -39,10 +39,10 @@ export async function POST(req: Request) {
       systemMessage,
       {
         role: 'user',
-        content: `Translate the following into EN and VI and output a JSON dict with the fields 'en' (English) and 'vi' (Vietnamese).
-Example input: xin chao
-Example output: {"en":"hello","vi":"xin chào"}
-Input: ${learn}
+        content: `I want to learn something new. Translate what I want to learn into EN and VI and output a JSON dict with the fields 'en' (English) and 'vi' (Vietnamese).
+Example input: I want to learn: right, as in "right turn"
+Example output: {"en":"right","vi":"phải"}
+Input: I want to learn: ${learn}
 Output:`,
       },
     ]
@@ -86,9 +86,9 @@ Output:`,
       {
         role: 'user',
         content: `Given input, provide a simple example sentence in Vietnamese and English. This should be a common usage, idiom, phrase, or sentence in Vietnamese, but not necessarily in English. It should be simple and understood by a 10-year old.
-Example input: xin chào
-Example output: {"vi":"Xin chào, bạn khỏe không?","en":"Hello, how are you?"}
-Input: ${payload.vi}
+Example input: vi:phải en:right
+Example output: {"vi":"Quẹo phải ở ngã tư","en":"Turn right at the intersection"}
+Input: vi:${payload.vi} en:${payload.en}
 Output:`,
       },
     ]
